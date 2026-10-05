@@ -1,0 +1,22 @@
+[project]
+name = "swiss-broker-tax-platform"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.142.2",
+    "opensteuerauszug",
+    "python-multipart>=0.0.32",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[tool.uv.sources]
+opensteuerauszug = { git = "https://github.com/vroonhof/opensteuerauszug.git" }
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
+]

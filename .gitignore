@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfplan
+
+# Financial/private data
+private/
+statements/
+uploads/
+outputs/
+
+# Local config/secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
