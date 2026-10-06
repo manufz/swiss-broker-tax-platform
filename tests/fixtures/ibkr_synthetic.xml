@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic test data: no real person, account, or transactions. -->
+<FlexQueryResponse queryName="Synthetic CHF account" type="AF">
+  <FlexStatements count="1">
+    <FlexStatement accountId="U0000000" fromDate="20250101" toDate="20251231" period="Annual" whenGenerated="20260115;120000">
+      <AccountInformation accountId="U0000000" name="Example Person" firstName="Example" lastName="Person" currency="CHF" stateResidentialAddress="ZH" />
+      <CashReport>
+        <CashReportCurrency accountId="U0000000" currency="CHF" fromDate="20250101" toDate="20251231" startingCash="1000" endingCash="1000" />
+      </CashReport>
+    </FlexStatement>
+  </FlexStatements>
+</FlexQueryResponse>

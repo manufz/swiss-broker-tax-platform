@@ -1,4 +1,5 @@
 import asyncio
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -13,6 +14,14 @@ app = FastAPI(
 )
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MiB
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SCHEMA_FILES = (
+    "eCH-0196-2-2.xsd",
+    "eCH-0007-6-0.xsd",
+    "eCH-0008-3-0.xsd",
+    "eCH-0010-7-0.xsd",
+    "eCH-0097-4-0.xsd",
+)
 
 
 @app.get("/health")
@@ -45,6 +54,12 @@ async def generate_statement(
             detail="The uploaded file does not appear to be XML.",
         )
 
+    if any(not (PROJECT_ROOT / "specs" / name).is_file() for name in SCHEMA_FILES):
+        raise HTTPException(
+            status_code=503,
+            detail="Statement validation is unavailable: required schemas are missing.",
+        )
+
     with tempfile.TemporaryDirectory(prefix="tax-statement-") as tmp:
         workdir = Path(tmp)
 
@@ -67,6 +82,9 @@ async def generate_statement(
             str(output_path),
         ]
 
+        if kursliste_dir := os.environ.get("KURSLISTE_DIR"):
+            command.extend(["--kursliste-dir", kursliste_dir])
+
         try:
             result = await asyncio.to_thread(
                 subprocess.run,
@@ -74,6 +92,7 @@ async def generate_statement(
                 capture_output=True,
                 check=False,
                 timeout=120,
+                cwd=PROJECT_ROOT,
             )
         except subprocess.TimeoutExpired as exc:
             raise HTTPException(
@@ -95,8 +114,7 @@ async def generate_statement(
         content=pdf,
         media_type="application/pdf",
         headers={
-            "Content-Disposition":
-                f'attachment; filename="steuerauszug-{tax_year}.pdf"',
+            "Content-Disposition": f'attachment; filename="steuerauszug-{tax_year}.pdf"',
             "Cache-Control": "no-store",
         },
     )

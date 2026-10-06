@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic test fixture only. No official prices or exchange rates.
+     Used with a CHF-only cash account, which requires no conversion. -->
+<kursliste xmlns="http://xmlns.estv.admin.ch/ictax/2.2.0/kursliste"
+  version="2.2.0.0" creationDate="2026-01-01T00:00:00" year="2025" />
