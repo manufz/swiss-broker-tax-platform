@@ -1,5 +1,7 @@
 # Swiss Broker Tax Platform
 
+Terraform setup is documented in [terraform/README.md](terraform/README.md).
+
 A FastAPI wrapper around the pinned `opensteuerauszug` engine. Accepts IBKR
 Flex XML and returns a Swiss tax statement PDF. Infrastructure is not yet deployed.
 
