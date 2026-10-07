@@ -50,16 +50,22 @@ the image. The `:ro` suffix makes it read-only during request processing.
 ## Checks and current limits
 
 ```bash
-uv run pytest -q
+uv run python -m pytest -q
 uv run ruff check app tests
 ```
 
-Tests use a synthetic CHF-only account and a synthetic Kursliste fixture;
-they require no download. eCH-0196 schemas in `specs/` validate generated XML.
+Tests use synthetic CHF cash and a USD securities portfolio with synthetic
+Kursliste rates; they require no download. They check holdings, transactions,
+cash conversions and broker-payment reconciliation. eCH-0196 schemas in `specs/`
+validate generated XML.
 Missing schemas stop API processing. See `specs/README.md` for provenance.
 
-The API currently uses `minimal` calculation mode. Successful processing and
-schema validation do not establish tax-calculation correctness or acceptance
+The API currently uses `minimal` calculation mode to create an import document.
+Securities dividends and withholding appear in PDF reconciliation but are not
+calculated securities payments in the eCH XML. See the
+[processing checkpoint](docs/processing-correctness.md) for expected amounts and
+mode limitations. Successful processing and schema validation do not establish
+tax-calculation correctness or acceptance
 by a tax authority. Realistic portfolio validation, sign-out checks and testing
 rejection of another authenticated user are still pending. Keep personal broker
 exports in the ignored `private/` or

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Entirely synthetic: no real person, account, security, prices or transactions.
+     USD cash: 1000 - 400 + 225 + 20 - 3 + 1 = 843.
+     Shares: opening 5 + buy 10 - sell 5 = closing 10. -->
+<FlexQueryResponse queryName="Synthetic portfolio" type="AF">
+  <FlexStatements count="1">
+    <FlexStatement accountId="U0000000" fromDate="20250101" toDate="20251231"
+      period="Annual" whenGenerated="20260115;120000">
+      <AccountInformation accountId="U0000000" name="Example Person"
+        firstName="Example" lastName="Person" currency="CHF"
+        stateResidentialAddress="ZH" />
+      <Trades>
+        <Trade accountId="U0000000" assetCategory="STK" conid="999000001"
+          symbol="ZZTEST" description="Synthetic Company" isin="US0000000001"
+          issuerCountryCode="US" currency="USD" tradeDate="20250303"
+          settleDateTarget="20250304" buySell="BUY" quantity="10"
+          tradePrice="40" tradeMoney="400" ibCommission="0" />
+        <Trade accountId="U0000000" assetCategory="STK" conid="999000001"
+          symbol="ZZTEST" description="Synthetic Company" isin="US0000000001"
+          issuerCountryCode="US" currency="USD" tradeDate="20250801"
+          settleDateTarget="20250804" buySell="SELL" quantity="-5"
+          tradePrice="45" tradeMoney="-225" ibCommission="0" />
+      </Trades>
+      <OpenPositions>
+        <OpenPosition accountId="U0000000" assetCategory="STK" conid="999000001"
+          symbol="ZZTEST" description="Synthetic Company" isin="US0000000001"
+          issuerCountryCode="US" currency="USD" reportDate="20251231"
+          position="10" markPrice="50" positionValue="500" />
+      </OpenPositions>
+      <CashTransactions>
+        <CashTransaction accountId="U0000000" assetCategory="STK" conid="999000001"
+          symbol="ZZTEST" isin="US0000000001" currency="USD"
+          dateTime="20250616;120000" description="Synthetic dividend"
+          type="Dividends" amount="20" />
+        <CashTransaction accountId="U0000000" assetCategory="STK" conid="999000001"
+          symbol="ZZTEST" isin="US0000000001" currency="USD"
+          dateTime="20250616;120000" description="Synthetic withholding"
+          type="Withholding Tax" amount="-3" />
+        <CashTransaction accountId="U0000000" currency="USD"
+          dateTime="20250616;120000" description="Synthetic credit interest"
+          type="Broker Interest Received" amount="1" />
+      </CashTransactions>
+      <CashReport>
+        <CashReportCurrency accountId="U0000000" currency="CHF"
+          fromDate="20250101" toDate="20251231" startingCash="1000" endingCash="1000" />
+        <CashReportCurrency accountId="U0000000" currency="USD"
+          fromDate="20250101" toDate="20251231" startingCash="1000" endingCash="843" />
+      </CashReport>
+    </FlexStatement>
+  </FlexStatements>
+</FlexQueryResponse>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Entirely synthetic exchange rates for automated tests; never use for filing.
+     No official security prices or distributions are included. -->
+<kursliste xmlns="http://xmlns.estv.admin.ch/ictax/2.2.0/kursliste"
+  version="2.2.0.0" creationDate="2026-01-01T00:00:00" year="2025">
+  <exchangeRate currency="USD" date="2025-06-16" value="0.92" />
+  <exchangeRateYearEnd currency="USD" year="2025" value="0.90" />
+</kursliste>
