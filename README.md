@@ -2,9 +2,14 @@
 
 Terraform setup is documented in [terraform/README.md](terraform/README.md).
 Image publishing is documented in [docs/publishing-image.md](docs/publishing-image.md).
+The remaining release steps are tracked in [docs/roadmap.md](docs/roadmap.md).
 
 A FastAPI wrapper around the pinned `opensteuerauszug` engine. Accepts IBKR
-Flex XML and returns a Swiss tax statement PDF. Infrastructure is not yet deployed.
+Flex XML and returns a Swiss tax statement PDF. An internal development instance
+is deployed to Azure Container Apps; authenticated browser access is still pending.
+It uses a read-only Azure Files mount of the official 2025 Kursliste database.
+A synthetic upload has produced a readable PDF in Azure. See
+[data provenance](docs/kursliste-provenance.md) for the verified export and checksums.
 
 ## Local setup
 
@@ -51,6 +56,6 @@ Missing schemas stop API processing. See `specs/README.md` for provenance.
 
 The API currently uses `minimal` calculation mode. Successful processing and
 schema validation do not establish tax-calculation correctness or acceptance
-by a tax authority. Authentication, deployment and real portfolio validation
+by a tax authority. Authentication and real portfolio validation
 are still pending. Keep personal broker exports in the ignored `private/` or
 `statements/` directories.

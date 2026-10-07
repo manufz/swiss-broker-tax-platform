@@ -56,11 +56,27 @@ resource "azurerm_container_app" "api" {
     min_replicas = 1
     max_replicas = 1
 
+    volume {
+      name         = "kursliste"
+      storage_name = azurerm_container_app_environment_storage.kursliste.name
+      storage_type = "AzureFile"
+    }
+
     container {
       name   = "api"
       image  = "${azurerm_container_registry.api.login_server}/swiss-tax-statement-api@${var.api_image_digest}"
       cpu    = 0.5
       memory = "1Gi"
+
+      env {
+        name  = "KURSLISTE_DIR"
+        value = "/data/kursliste"
+      }
+
+      volume_mounts {
+        name = "kursliste"
+        path = "/data/kursliste"
+      }
 
       startup_probe {
         transport               = "HTTP"

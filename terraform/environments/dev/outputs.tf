@@ -37,3 +37,13 @@ output "container_app_internal_fqdn" {
   description = "API hostname reachable only from within this Container Apps environment."
   value       = azurerm_container_app.api.ingress[0].fqdn
 }
+
+output "reference_data_storage_account_name" {
+  description = "Storage account used to upload public Kursliste reference data."
+  value       = azurerm_storage_account.reference_data.name
+}
+
+output "kursliste_share_name" {
+  description = "Azure Files share mounted read-only by the API."
+  value       = azurerm_storage_share.kursliste.name
+}

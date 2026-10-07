@@ -3,8 +3,9 @@
 The configuration declares the resource group `rg-swiss-tax-statement-dev`
 in `switzerlandnorth`, a Basic Azure Container Registry for the API image,
 and a user-assigned managed identity with `AcrPull` on that registry.
-The configuration also declares the first Container App runtime and logging
-workspace. Kursliste storage and authenticated browser access are later steps.
+The configuration also declares the Container App runtime, logging workspace
+and Azure Files storage for public Kursliste data. Authenticated browser access
+is a later step. See `../docs/roadmap.md` for the remaining release work.
 
 ## Files
 
@@ -18,6 +19,7 @@ Splitting them by purpose helps us read them; file names do not control order.
 - `registry.tf`: the image registry and its deterministic name suffix.
 - `identity.tf`: the managed identity and its registry-scoped pull permission.
 - `container_app.tf`: the logging workspace, hosting environment and API runtime.
+- `storage.tf`: the reference-data account, file share and read-only environment mount.
 - `outputs.tf`: values Terraform shows after deployment.
 
 We use the AzureRM 4.x series. Commit `.terraform.lock.hcl` after initialization
@@ -39,6 +41,23 @@ terraform -chdir=terraform/environments/dev validate
 `init` downloads the provider. `fmt` checks formatting. `validate` checks the
 configuration against the provider's schema. None of these create Azure resources.
 
+## Everyday workflow
+
+Edit the `.tf` files, then run:
+
+```bash
+terraform -chdir=terraform/environments/dev apply
+```
+
+Terraform refreshes state and shows a fresh plan. Review it, then type `yes` if
+the changes are expected. `No changes` means Azure already matches the
+configuration; there is nothing to approve or deploy. Uploading files into a
+share is a separate operation from creating that share.
+
+Saved plans are optional. They are useful when you want to apply the exact plan
+reviewed earlier, for example in CI. Commit `.tf` files and `.terraform.lock.hcl`;
+keep `.terraform/`, `*.tfplan` and Terraform state out of Git.
+
 ## Saved plans after a successful apply
 
 A saved plan belongs to the Terraform state snapshot used when it was generated.
@@ -51,7 +70,7 @@ terraform -chdir=terraform/environments/dev plan
 ```
 
 If it reports `No changes`, no apply is needed. For a later configuration change,
-generate and review a new saved plan before applying it.
+use interactive `apply` or generate and review a new saved plan.
 
 ## Next step: inspect an Azure plan
 
@@ -65,9 +84,8 @@ export ARM_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 terraform -chdir=terraform/environments/dev plan
 ```
 
-Review the plan before applying. From the existing identity checkpoint,
-we expect a logging workspace, Container Apps environment and Container App
-to be added. Existing resources should remain unchanged.
+Review the plan before applying. Once all the resources below are deployed,
+a fresh plan should report `No changes`.
 The AzureRM 4.x provider requires an explicit subscription ID; the environment
 variable supplies it without embedding account details in the configuration.
 Automatic resource-provider registration is disabled. Check that
@@ -193,3 +211,55 @@ az containerapp logs show --name ca-swiss-tax-statement-api-dev \
 Azure CLI may prompt to install its Container Apps extension. A ready revision
 and passing health probes are the initial success criteria. Authentication and
 persistent data provisioning will follow before real statements are processed.
+
+## Persistent Kursliste storage
+
+This step creates a Standard LRS storage account and a 5 GiB SMB file share for
+public reference data. The Container App mounts it read-only at `/data/kursliste`.
+The upstream reader prefers SQLite when both SQLite and XML are present; only
+the converted database needs uploading. The storage account's authenticated
+public network endpoint is needed for this environment without a custom VNet.
+
+The Azure Files SMB mount uses a storage account key in the environment's storage
+binding. Terraform marks the value sensitive but stores it in state and saved
+plans. Those files are already ignored by Git; the next infrastructure step is
+migrating state to a restricted Azure backend. No storage key is an output or a
+literal in configuration. The managed identity continues to handle image pulls.
+
+Deploy the storage configuration after reviewing the plan:
+
+```bash
+az provider register --namespace Microsoft.Storage --wait
+terraform -chdir=terraform/environments/dev apply
+```
+
+An empty share does not make statement processing ready. After applying, upload
+the official database downloaded during local setup:
+
+```bash
+kursliste_account=$(terraform -chdir=terraform/environments/dev output -raw reference_data_storage_account_name)
+kursliste_md5=$(.venv/bin/python -c 'import base64,hashlib; f=open("data/kursliste/kursliste_2025.sqlite","rb"); print(base64.b64encode(hashlib.file_digest(f,"md5").digest()).decode())')
+
+az storage file upload --account-name "$kursliste_account" \
+  --share-name kursliste --source data/kursliste/kursliste_2025.sqlite \
+  --path kursliste_2025.sqlite --auth-mode key \
+  --content-md5 "$kursliste_md5" --validate-content --output none
+
+az storage file show --account-name "$kursliste_account" \
+  --share-name kursliste --path kursliste_2025.sqlite --auth-mode key \
+  --query '{bytes:properties.contentLength,md5:properties.contentSettings.contentMd5}' \
+  --output json
+```
+
+Azure CLI obtains the account key using your Azure login; the account needs
+permission to list storage keys. The MD5 verifies transfer integrity, not source
+authenticity. Record the official export metadata and a SHA-256 checksum for
+release provenance. Future refreshes should upload to a versioned folder and
+switch the app's data path only after verification; avoid overwriting a database
+in use by the running app.
+
+After upload, test synthetic XML inside the deployed container and confirm a
+readable PDF, then compare realistic sanitized portfolio examples before claiming
+tax-calculation correctness. Storage and transactions are metered Azure resources.
+
+Reference: https://learn.microsoft.com/azure/container-apps/storage-mounts
