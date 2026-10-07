@@ -3,7 +3,8 @@
 The configuration declares the resource group `rg-swiss-tax-statement-dev`
 in `switzerlandnorth`, a Basic Azure Container Registry for the API image,
 and a user-assigned managed identity with `AcrPull` on that registry.
-The API runtime and storage will be added in later steps.
+The configuration also declares the first Container App runtime and logging
+workspace. Kursliste storage and authenticated browser access are later steps.
 
 ## Files
 
@@ -16,6 +17,7 @@ Splitting them by purpose helps us read them; file names do not control order.
 - `main.tf`: the resource we want Terraform to manage.
 - `registry.tf`: the image registry and its deterministic name suffix.
 - `identity.tf`: the managed identity and its registry-scoped pull permission.
+- `container_app.tf`: the logging workspace, hosting environment and API runtime.
 - `outputs.tf`: values Terraform shows after deployment.
 
 We use the AzureRM 4.x series. Commit `.terraform.lock.hcl` after initialization
@@ -37,6 +39,20 @@ terraform -chdir=terraform/environments/dev validate
 `init` downloads the provider. `fmt` checks formatting. `validate` checks the
 configuration against the provider's schema. None of these create Azure resources.
 
+## Saved plans after a successful apply
+
+A saved plan belongs to the Terraform state snapshot used when it was generated.
+A successful apply updates state, so applying that same file again reports
+`Saved plan is stale`. The first successful deployment is still intact.
+Generate a fresh plan to check the current deployment:
+
+```bash
+terraform -chdir=terraform/environments/dev plan
+```
+
+If it reports `No changes`, no apply is needed. For a later configuration change,
+generate and review a new saved plan before applying it.
+
 ## Next step: inspect an Azure plan
 
 Once the tools are installed, authenticate interactively and select the subscription:
@@ -49,9 +65,9 @@ export ARM_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 terraform -chdir=terraform/environments/dev plan
 ```
 
-Review the plan before applying. From the existing registry checkpoint,
-we expect one managed identity and one role assignment to be added. The existing
-resource group and registry should remain unchanged.
+Review the plan before applying. From the existing identity checkpoint,
+we expect a logging workspace, Container Apps environment and Container App
+to be added. Existing resources should remain unchanged.
 The AzureRM 4.x provider requires an explicit subscription ID; the environment
 variable supplies it without embedding account details in the configuration.
 Automatic resource-provider registration is disabled. Check that
@@ -133,3 +149,47 @@ verified when the Container App is deployed.
 for permissions. These IDs serve different purposes; neither is a password.
 
 Reference: https://learn.microsoft.com/azure/container-apps/managed-identity-image-pull
+
+## First Container App runtime
+
+This step creates three resources:
+
+- `log-swiss-tax-statement-dev`: stores runtime logs with 30-day retention.
+- `cae-swiss-tax-statement-dev`: hosts apps using a Consumption workload profile.
+- `ca-swiss-tax-statement-api-dev`: runs the verified API image with the existing
+  identity for registry pulls.
+
+The API image is pinned by digest through `api_image_digest`. We start with one
+replica, 0.5 vCPU and 1 GiB memory so the runtime remains available for CLI checks.
+This incurs runtime charges while active; log ingestion is also metered.
+Scale-to-zero will be configured when the access path is ready.
+
+Ingress is internal to this Container Apps environment. Its hostname will not
+serve the API to your laptop's browser. `/health` probes verify that the process
+starts and responds; they do not assert that tax-processing data is installed.
+Official Kursliste data is not mounted yet, so this step verifies startup and
+managed identity image pulls. Statement processing in Azure is a later step.
+
+Both Azure services below must be registered before applying:
+
+```bash
+az provider register --namespace Microsoft.App --wait
+az provider register --namespace Microsoft.OperationalInsights --wait
+terraform -chdir=terraform/environments/dev plan -out=runtime.tfplan
+terraform -chdir=terraform/environments/dev apply runtime.tfplan
+```
+
+Verify the deployed runtime:
+
+```bash
+az containerapp show --name ca-swiss-tax-statement-api-dev \
+  --resource-group rg-swiss-tax-statement-dev \
+  --query '{state:properties.provisioningState,revision:properties.latestReadyRevisionName}' \
+  --output table
+az containerapp logs show --name ca-swiss-tax-statement-api-dev \
+  --resource-group rg-swiss-tax-statement-dev --type console --tail 20
+```
+
+Azure CLI may prompt to install its Container Apps extension. A ready revision
+and passing health probes are the initial success criteria. Authentication and
+persistent data provisioning will follow before real statements are processed.

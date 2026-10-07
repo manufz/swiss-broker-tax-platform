@@ -27,3 +27,13 @@ output "registry_pull_identity_principal_id" {
   description = "Microsoft Entra principal ID granted AcrPull on the registry."
   value       = azurerm_user_assigned_identity.registry_pull.principal_id
 }
+
+output "container_app_name" {
+  description = "API Container App name for Azure CLI runtime checks."
+  value       = azurerm_container_app.api.name
+}
+
+output "container_app_internal_fqdn" {
+  description = "API hostname reachable only from within this Container Apps environment."
+  value       = azurerm_container_app.api.ingress[0].fqdn
+}
