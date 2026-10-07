@@ -14,6 +14,7 @@ Splitting them by purpose helps us read them; file names do not control order.
 
 - `versions.tf`: Terraform and AzureRM provider version constraints.
 - `backend.tf`: private Azure Blob state storage using your Azure CLI identity.
+- `authentication.tf`: Entra browser sign-in, credential rotation and ingress authorization.
 - `providers.tf`: configures the provider that communicates with Azure.
 - `variables.tf`: inputs, starting with the Azure region.
 - `main.tf`: the resource we want Terraform to manage.
@@ -23,8 +24,10 @@ Splitting them by purpose helps us read them; file names do not control order.
 - `storage.tf`: the reference-data account, file share and read-only environment mount.
 - `outputs.tf`: values Terraform shows after deployment.
 
-We use the AzureRM 4.x series. Commit `.terraform.lock.hcl` after initialization
-to record the exact provider version and checksums. Modules will be introduced
+We use AzureRM 4.x for infrastructure, AzureAD 3.x for Entra registrations, AzAPI
+2.x for Container Apps authentication and the time provider for credential rotation.
+Commit `.terraform.lock.hcl` after initialization to record exact provider versions
+and checksums. Modules will be introduced
 when we have reusable infrastructure; this first step needs none.
 
 ## Local validation
@@ -267,3 +270,12 @@ readable PDF, then compare realistic sanitized portfolio examples before claimin
 tax-calculation correctness. Storage and transactions are metered Azure resources.
 
 Reference: https://learn.microsoft.com/azure/container-apps/storage-mounts
+
+## Authentication checkpoint
+
+Entra sign-in and external HTTPS are deployed. Internal ingress requests and an
+external `/docs` request returned 401 without authentication. The downloaded
+browser-test PDF matches the synthetic fixture. See the
+[authentication guide](../docs/authentication.md) for the access policy,
+credential lifetime and browser verification steps. The ingress hostname output
+is now `container_app_fqdn`; `api_url` supplies its external HTTPS URL.

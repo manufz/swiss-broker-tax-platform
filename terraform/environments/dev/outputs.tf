@@ -33,8 +33,8 @@ output "container_app_name" {
   value       = azurerm_container_app.api.name
 }
 
-output "container_app_internal_fqdn" {
-  description = "API hostname reachable only from within this Container Apps environment."
+output "container_app_fqdn" {
+  description = "API ingress hostname; authentication is required for application requests."
   value       = azurerm_container_app.api.ingress[0].fqdn
 }
 
@@ -46,4 +46,24 @@ output "reference_data_storage_account_name" {
 output "kursliste_share_name" {
   description = "Azure Files share mounted read-only by the API."
   value       = azurerm_storage_share.kursliste.name
+}
+
+output "api_sign_in_url" {
+  description = "Browser sign-in URL that returns to the API's upload/download interface."
+  value       = "${local.api_public_url}/.auth/login/aad?post_login_redirect_uri=/docs"
+}
+
+output "api_url" {
+  description = "External HTTPS API URL protected by Microsoft Entra authentication."
+  value       = local.api_public_url
+}
+
+output "auth_client_id" {
+  description = "Microsoft Entra application client ID used for browser sign-in."
+  value       = azuread_application.api_login.client_id
+}
+
+output "auth_client_secret_expires_at" {
+  description = "Expiry of the authentication credential; rotate by applying Terraform before this date."
+  value       = azuread_application_password.api_login.end_date
 }

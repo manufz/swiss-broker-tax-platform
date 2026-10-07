@@ -5,10 +5,12 @@ Terraform state is stored in Azure using identity authentication; see the
 [remote-state guide](terraform/remote-state.md).
 Image publishing is documented in [docs/publishing-image.md](docs/publishing-image.md).
 The remaining release steps are tracked in [docs/roadmap.md](docs/roadmap.md).
+Sign-in and the verified browser flow are documented in [docs/authentication.md](docs/authentication.md).
 
 A FastAPI wrapper around the pinned `opensteuerauszug` engine. Accepts IBKR
-Flex XML and returns a Swiss tax statement PDF. An internal development instance
-is deployed to Azure Container Apps; authenticated browser access is still pending.
+Flex XML and returns a Swiss tax statement PDF. A development instance is deployed
+to Azure Container Apps with Entra authentication and external HTTPS. The browser
+test produced a downloaded PDF matching the synthetic fixture.
 It uses a read-only Azure Files mount of the official 2025 Kursliste database.
 A synthetic upload has produced a readable PDF in Azure. See
 [data provenance](docs/kursliste-provenance.md) for the verified export and checksums.
@@ -58,6 +60,7 @@ Missing schemas stop API processing. See `specs/README.md` for provenance.
 
 The API currently uses `minimal` calculation mode. Successful processing and
 schema validation do not establish tax-calculation correctness or acceptance
-by a tax authority. Authentication and real portfolio validation
-are still pending. Keep personal broker exports in the ignored `private/` or
+by a tax authority. Realistic portfolio validation, sign-out checks and testing
+rejection of another authenticated user are still pending. Keep personal broker
+exports in the ignored `private/` or
 `statements/` directories.

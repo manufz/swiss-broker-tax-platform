@@ -22,7 +22,7 @@ resource "azurerm_container_app_environment" "platform" {
 }
 
 resource "azurerm_container_app" "api" {
-  name                         = "ca-swiss-tax-statement-api-dev"
+  name                         = local.api_app_name
   resource_group_name          = azurerm_resource_group.platform.name
   container_app_environment_id = azurerm_container_app_environment.platform.id
   revision_mode                = "Single"
@@ -39,8 +39,13 @@ resource "azurerm_container_app" "api" {
     identity = azurerm_user_assigned_identity.registry_pull.id
   }
 
+  secret {
+    name  = "entra-client-secret"
+    value = azuread_application_password.api_login.value
+  }
+
   ingress {
-    external_enabled           = false
+    external_enabled           = true
     allow_insecure_connections = false
     target_port                = 8000
     transport                  = "http"

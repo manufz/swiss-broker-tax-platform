@@ -14,3 +14,15 @@ variable "api_image_digest" {
     error_message = "Use a sha256 digest with 64 lowercase hexadecimal characters."
   }
 }
+
+variable "allowed_user_object_ids" {
+  description = "Microsoft Entra user object IDs allowed to access the development API."
+  type        = set(string)
+
+  validation {
+    condition = length(var.allowed_user_object_ids) > 0 && alltrue([
+      for id in var.allowed_user_object_ids : can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", id))
+    ])
+    error_message = "Provide at least one valid Entra user object ID."
+  }
+}
