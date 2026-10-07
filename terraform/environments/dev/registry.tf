@@ -10,4 +10,7 @@ resource "azurerm_container_registry" "api" {
   sku                 = "Basic"
   admin_enabled       = false
   tags                = azurerm_resource_group.platform.tags
+
+  # Required for Container Apps to authenticate image pulls with managed identity.
+  azuread_authentication_as_arm_policy_enabled = true
 }
