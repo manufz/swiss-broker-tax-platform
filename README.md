@@ -1,6 +1,8 @@
 # Swiss Broker Tax Platform
 
 Terraform setup is documented in [terraform/README.md](terraform/README.md).
+Terraform state is stored in Azure using identity authentication; see the
+[remote-state guide](terraform/remote-state.md).
 Image publishing is documented in [docs/publishing-image.md](docs/publishing-image.md).
 The remaining release steps are tracked in [docs/roadmap.md](docs/roadmap.md).
 

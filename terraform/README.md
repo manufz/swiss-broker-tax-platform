@@ -13,6 +13,7 @@ All `.tf` files in `environments/dev/` form one Terraform configuration.
 Splitting them by purpose helps us read them; file names do not control order.
 
 - `versions.tf`: Terraform and AzureRM provider version constraints.
+- `backend.tf`: private Azure Blob state storage using your Azure CLI identity.
 - `providers.tf`: configures the provider that communicates with Azure.
 - `variables.tf`: inputs, starting with the Azure region.
 - `main.tf`: the resource we want Terraform to manage.
@@ -122,8 +123,11 @@ terraform -chdir=terraform/environments/dev output container_registry_login_serv
 Creating a registry does not upload an image. Building and pushing the image
 is the next step after creation.
 
-Terraform currently uses local state in this directory. State and plan files
-are ignored by Git. A remote backend will be a separate step before CI/CD.
+Terraform now uses a private Azure Blob backend, authenticated through your Azure
+CLI identity. The independent [bootstrap configuration](bootstrap/README.md)
+manages its storage and has its own state blob. Existing local state was migrated
+with resource records preserved. See [remote state](remote-state.md) for the
+migration, backups and normal workflow. State and saved plans remain outside Git.
 
 ## Managed identity for image pulls
 
