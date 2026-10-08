@@ -55,14 +55,82 @@ especially `calculate/minimal_tax_value.py` and the CLI's calculation-mode
 dispatch in `steuerauszug.py`. Refresh these checks when updating the
 engine.
 
-## Still to verify
+## Phase 1 implementation and verification
 
-- Malformed XML, missing canton/required fields/reference data, year mismatch and upload limits.
-- Processing failure, timeout, concurrency limits and temporary-file cleanup.
-- Diagnostics that expose useful outcomes without logging account or transaction data.
-- Broader portfolio cases: multiple securities/accounts, partial-year holdings,
-  corporate actions and applicable broker corrections.
-- Barcode decoding and an actual import into the intended tax software.
+The local suite now has 55 passing tests. It covers malformed XML, DTD/entity
+rejection (including UTF-16 input), missing/invalid canton, required engine fields,
+missing year/reference data, stale position dates, mismatched account identifiers,
+unsupported asset categories and the exact 10 MiB upload boundary. It also covers
+multiple accounts, multiple securities and a holding first acquired during the year.
 
-This synthetic checkpoint verifies the tested mappings and known limitations. It
-does not close the full processing-correctness roadmap step.
+The API accepts complete calendar-year reports, with one statement per account,
+one shared Swiss canton, consistent account identifiers and 31 December position
+snapshots. Interim exports are rejected rather than relabelled as year-end data.
+Recognized summary/pseudo rows are left to the importer; unsupported detailed
+trade/position categories are rejected before they can be silently omitted.
+The deployed reference dataset currently covers 2025.
+
+Processing runs in a worker that owns its temporary directory and a single
+non-blocking capacity slot. A competing job returns 503 with `Retry-After: 5`;
+`/health` remains responsive. This is a limit per API process. Keep one Uvicorn
+worker per replica until scaling/concurrency sizing is reviewed in phase 3.
+
+A 120-second subprocess timeout kills and waits for the engine. Tests exercise a
+real sleeping child and check that it is gone and partial output removed. On HTTP
+task cancellation, the worker continues until completion or timeout; it retains
+its files and slot until cleanup finishes. Tests verify this lifetime. An abrupt
+container/host crash is outside that graceful-cleanup guarantee; temporary data
+is not written to the Kursliste share or another persistent document store.
+
+The engine receives explicit empty configuration/identifier files and an explicit
+Kursliste path, so local personal configuration cannot alter API results. Logs
+contain processing status/duration and a busy event; stdout/stderr, filenames,
+account identifiers, input XML and exception text are not logged or returned.
+Failure tests assert that synthetic private markers do not escape into logs or
+responses.
+
+| Response | Meaning |
+| --- | --- |
+| 400 | Wrong filename or malformed/forbidden XML |
+| 413 | Uploaded file exceeds 10 MiB |
+| 422 | Invalid form/report fields or engine processing failure, including missing currency rates |
+| 503 | Busy processor, missing schemas/year data, or an operating-system availability error |
+| 504 | Engine exceeded the processing timeout |
+| 500 | Engine reported success but produced missing or invalid PDF output |
+
+The file limit is checked after FastAPI parses multipart input; it is not a total
+HTTP body limit before multipart spooling. Add an ingress/body limit before
+expanding beyond the current restricted single-user audience.
+
+## Barcode capacity regression
+
+The pinned upstream renderer occasionally overestimates the bytes that fit its
+fixed 35-row, 13-column Macro PDF417 symbol. A deterministic regression test
+reproduces `Not enough space in the barcode to fit the data` using the original
+encoder call.
+
+`app/engine.py` adapts only that call: it counts actual macro control words,
+reserves the length descriptor, error correction, final terminator and byte-mode
+latch, then caps segments to complete six-byte compaction groups. It preserves
+the symbol dimensions, error correction, file identifiers and compressed XML.
+The API invokes this adapter with `python -m app.engine`; directly running the
+upstream CLI does not apply the fix.
+
+Regression tests independently decode boundary-sized symbols with ZXing. The CLI
+portfolio test decodes embedded PDF417 symbols, reassembles and decompresses them,
+and checks byte-for-byte equality with the final eCH XML. The API test also reads
+holdings and amounts from the decoded payload. The rendered synthetic barcode
+page was inspected and all three symbols decoded from that page image.
+
+## Acceptance checks remaining
+
+The code and local tests are complete for this checkpoint. Deploy the new image
+and finish the browser/tax-software checks in [phase 1 acceptance](phase-1-acceptance.md)
+before marking the whole phase complete. Barcode decoding alone does not prove
+acceptance by the intended tax software.
+
+Corporate actions, derivatives, short positions and post-year-end corrections
+need dedicated portfolio cases before claiming those workflows are validated.
+The current API exposes one annual XML upload and does not expose the engine's
+separate corrections-file option. The tested release scope is cash and ordinary
+long-share holdings with minimal-mode import semantics.

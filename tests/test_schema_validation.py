@@ -14,7 +14,9 @@ def test_real_schema_validation_accepts_output_and_rejects_invalid_canton(tmp_pa
     xml_output = tmp_path / "statement.xml"
     result = subprocess.run(
         [
-            str(Path(sys.executable).parent / "opensteuerauszug"),
+            sys.executable,
+            "-m",
+            "app.engine",
             "process",
             str(root / "tests/fixtures/ibkr_synthetic.xml"),
             "--importer",

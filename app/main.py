@@ -1,12 +1,14 @@
 import asyncio
-import os
-import subprocess
-import tempfile
+import logging
 from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
+
+from app.processing import process_statement
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 
 app = FastAPI(
     title="Swiss Broker Tax Platform",
@@ -40,18 +42,15 @@ async def generate_statement(
             detail="An IBKR Flex XML file is required.",
         )
 
-    contents = await statement.read(MAX_UPLOAD_SIZE + 1)
+    try:
+        contents = await statement.read(MAX_UPLOAD_SIZE + 1)
+    finally:
+        await statement.close()
 
     if len(contents) > MAX_UPLOAD_SIZE:
         raise HTTPException(
             status_code=413,
             detail="Statement exceeds the 10 MiB upload limit.",
-        )
-
-    if not contents.lstrip().startswith(b"<"):
-        raise HTTPException(
-            status_code=400,
-            detail="The uploaded file does not appear to be XML.",
         )
 
     if any(not (PROJECT_ROOT / "specs" / name).is_file() for name in SCHEMA_FILES):
@@ -60,55 +59,7 @@ async def generate_statement(
             detail="Statement validation is unavailable: required schemas are missing.",
         )
 
-    with tempfile.TemporaryDirectory(prefix="tax-statement-") as tmp:
-        workdir = Path(tmp)
-
-        input_path = workdir / "statement.xml"
-        output_path = workdir / "steuerauszug.pdf"
-
-        input_path.write_bytes(contents)
-
-        command = [
-            "opensteuerauszug",
-            "process",
-            str(input_path),
-            "--importer",
-            "ibkr",
-            "--tax-calculation-level",
-            "minimal",
-            "--tax-year",
-            str(tax_year),
-            "-o",
-            str(output_path),
-        ]
-
-        if kursliste_dir := os.environ.get("KURSLISTE_DIR"):
-            command.extend(["--kursliste-dir", kursliste_dir])
-
-        try:
-            result = await asyncio.to_thread(
-                subprocess.run,
-                command,
-                capture_output=True,
-                check=False,
-                timeout=120,
-                cwd=PROJECT_ROOT,
-            )
-        except subprocess.TimeoutExpired as exc:
-            raise HTTPException(
-                status_code=504,
-                detail="Statement processing timed out.",
-            ) from exc
-
-        if result.returncode != 0 or not output_path.exists():
-            # Intentionally do not return CLI stderr to the caller.
-            # Financial/account information could appear there.
-            raise HTTPException(
-                status_code=422,
-                detail="The statement could not be processed.",
-            )
-
-        pdf = output_path.read_bytes()
+    pdf = await asyncio.to_thread(process_statement, contents, tax_year, PROJECT_ROOT)
 
     return Response(
         content=pdf,

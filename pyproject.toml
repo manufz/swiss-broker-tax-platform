@@ -5,18 +5,22 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "defusedxml>=0.7.1",
     "fastapi>=0.142.2",
     "opensteuerauszug",
+    "pdf417gen",
     "python-multipart>=0.0.32",
     "uvicorn[standard]>=0.54.0",
 ]
 
 [tool.uv.sources]
 opensteuerauszug = { git = "https://github.com/vroonhof/opensteuerauszug.git" }
+pdf417gen = { git = "https://github.com/vroonhof/pdf417-py.git", rev = "44ce800bf7301ea88aaabd2e1a680238c96fc4a9" }
 
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.1.1",
     "ruff>=0.16.10",
+    "zxing-cpp>=2.3.0",
 ]

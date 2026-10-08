@@ -31,6 +31,8 @@ Downloaded XML and SQLite files are excluded from Git and Docker builds.
 Open http://localhost:8000/docs and submit a Flex XML to `POST /v1/statements`
 with the matching `tax_year`. The XML must include the Swiss canton in
 `AccountInformation.stateResidentialAddress`; there is currently no API override.
+Use a complete calendar-year report with 31 December open positions and one
+statement per account. All accounts must use the same Swiss canton.
 
 ## Run in Docker
 
@@ -59,6 +61,10 @@ Kursliste rates; they require no download. They check holdings, transactions,
 cash conversions and broker-payment reconciliation. eCH-0196 schemas in `specs/`
 validate generated XML.
 Missing schemas stop API processing. See `specs/README.md` for provenance.
+The API runs one processing job per worker; competing requests return 503 with
+`Retry-After: 5`. Engine jobs time out after 120 seconds and clean up temporary
+files. It uses `app/engine.py` to correct the pinned renderer's barcode capacity;
+running the upstream CLI directly bypasses that adapter.
 
 The API currently uses `minimal` calculation mode to create an import document.
 Securities dividends and withholding appear in PDF reconciliation but are not
@@ -66,7 +72,8 @@ calculated securities payments in the eCH XML. See the
 [processing checkpoint](docs/processing-correctness.md) for expected amounts and
 mode limitations. Successful processing and schema validation do not establish
 tax-calculation correctness or acceptance
-by a tax authority. Realistic portfolio validation, sign-out checks and testing
-rejection of another authenticated user are still pending. Keep personal broker
+by a tax authority. The hardened code passes local tests; deployment, browser
+access checks and an actual tax-software import remain on the
+[phase 1 acceptance checklist](docs/phase-1-acceptance.md). Keep personal broker
 exports in the ignored `private/` or
 `statements/` directories.
