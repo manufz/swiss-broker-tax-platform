@@ -50,6 +50,22 @@ def forbidden(path):
 
 def main():
     findings = set()
+    private_email = None
+    # Read the notification identity only from ignored settings; never print it.
+    settings = Path("terraform/environments/dev/dev.auto.tfvars")
+    if settings.is_file():
+        match = re.search(
+            r'^\s*notification_email\s*=\s*"([^"]+)"',
+            settings.read_text(),
+            re.MULTILINE,
+        )
+        if match:
+            private_email = match.group(1).casefold().encode()
+            addresses = git("log", "--all", "--format=%ae%n%ce").decode().splitlines()
+            if match.group(1).casefold() in {value.casefold() for value in addresses}:
+                findings.add(
+                    "History: private notification email in commit author/committer metadata"
+                )
     objects = git("rev-list", "--objects", "--all").decode().splitlines()
     pairs = [
         (line.split(" ", 1)[0], line.split(" ", 1)[1])
@@ -62,6 +78,8 @@ def main():
         if git("cat-file", "-t", oid).strip() != b"blob":
             continue
         content = git("cat-file", "blob", oid)
+        if private_email and private_email in content.lower():
+            findings.add("History: private notification email in tracked file content")
         for kind, pattern in PATTERNS.items():
             if pattern.search(content):
                 findings.add(f"History: {kind} marker in {path}")
@@ -73,6 +91,10 @@ def main():
         if forbidden(path):
             findings.add(f"Working tree: private artifact path {path}")
         if Path(path).is_file():
+            if private_email and private_email in Path(path).read_bytes().lower():
+                findings.add(
+                    "Working tree: private notification email in publishable file content"
+                )
             for kind, pattern in PATTERNS.items():
                 if pattern.search(Path(path).read_bytes()):
                     findings.add(f"Working tree: {kind} marker in {path}")

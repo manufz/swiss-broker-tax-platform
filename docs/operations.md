@@ -15,13 +15,14 @@ the separate state-storage group. Cost reporting/notifications can be delayed.
 The current deployment's billing currency was verified as EUR, so its default
 budget is EUR 25 per month.
 
-The error action group targets subscription Owners by default. Owner-role email
-requires an Email value in the user's Entra contact profile; it is not enough to
-have a login name. On 2026-10-13 the developer's primary contact Email was empty,
-so delivery remains unverified. Fill that contact field or set
-`TF_VAR_notification_email` privately and apply Terraform to use an explicit
-receiver. Do not commit personal `.tfvars`. Use the portal action-group test to
-confirm delivery. See [Microsoft's role-email requirements](https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/action-groups#email-azure-resource-manager).
+The error action group defaults to subscription Owners when no explicit address
+is configured. The developer has now configured an explicit receiver in ignored,
+owner-only `dev.auto.tfvars`; the same private setting also supplies budget email.
+The Terraform input is sensitive, and no recipient address belongs in tracked
+files. Confirm actual delivery with the portal action-group test and complete any
+Azure email verification request. Git commit metadata must also use a private
+GitHub no-reply identity before publication; ignoring settings alone does not
+remove personal addresses already in history.
 
 The error alert checks every five minutes for three engine/server 5xx events in
 fifteen minutes. Busy events and invalid-input 4xx are excluded. A dead process

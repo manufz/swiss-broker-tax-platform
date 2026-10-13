@@ -39,6 +39,7 @@ variable "notification_email" {
   type        = string
   default     = null
   nullable    = true
+  sensitive   = true
   validation {
     condition     = var.notification_email == null ? true : can(regex("^[^@ ]+@[^@ ]+\\.[^@ ]+$", var.notification_email))
     error_message = "Use a valid email address or null."

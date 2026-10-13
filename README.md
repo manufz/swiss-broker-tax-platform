@@ -59,8 +59,9 @@ The test suite covers expected cash/holdings/trades, input and schema failures,
 timeouts/concurrency/cancellation, temporary-file cleanup, privacy and decoded
 barcodes. Deployed synthetic processing and unauthenticated access checks are
 recorded in [acceptance evidence](docs/phase-1-acceptance.md). Browser logout,
-another signed-in identity and destination tax-software import require manual
-acceptance. GitHub workflows are prepared; their first hosted runs happen after
+another signed-in identity require manual acceptance. Destination tax-software
+import is an optional interoperability check, outside the current platform-test
+scope. GitHub workflows are prepared; their first hosted runs happen after
 publication and environment setup. See [release status](docs/roadmap.md).
 
 ## Try locally without Azure or personal data
