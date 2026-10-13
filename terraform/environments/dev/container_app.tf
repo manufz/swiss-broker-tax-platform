@@ -57,9 +57,13 @@ resource "azurerm_container_app" "api" {
   }
 
   template {
-    # Keep one replica available for the first runtime checks via Azure CLI.
-    min_replicas = 1
+    min_replicas = var.min_replicas
     max_replicas = 1
+
+    http_scale_rule {
+      name                = "http-requests"
+      concurrent_requests = "1"
+    }
 
     volume {
       name         = "kursliste"
@@ -75,7 +79,7 @@ resource "azurerm_container_app" "api" {
 
       env {
         name  = "KURSLISTE_DIR"
-        value = "/data/kursliste"
+        value = var.kursliste_directory
       }
 
       volume_mounts {
@@ -103,7 +107,7 @@ resource "azurerm_container_app" "api" {
       readiness_probe {
         transport               = "HTTP"
         port                    = 8000
-        path                    = "/health"
+        path                    = var.readiness_probe_path
         interval_seconds        = 10
         success_count_threshold = 1
         timeout                 = 2

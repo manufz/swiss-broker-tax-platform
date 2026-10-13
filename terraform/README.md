@@ -1,281 +1,109 @@
-# Terraform: development environment
+# Terraform development deployment
 
-The configuration declares the resource group `rg-swiss-tax-statement-dev`
-in `switzerlandnorth`, a Basic Azure Container Registry for the API image,
-and a user-assigned managed identity with `AcrPull` on that registry.
-The configuration also declares the Container App runtime, logging workspace
-and Azure Files storage for public Kursliste data. Authenticated browser access
-is a later step. See `../docs/roadmap.md` for the remaining release work.
+The current configuration manages Switzerland North resources: resource group,
+Basic ACR (admin disabled), scoped AcrPull identity, Container Apps environment
+and API, Log Analytics, read-only Azure Files data, Entra sign-in/allowlist,
+credential rotation, cost budget and processing alert. Optional GitHub federation
+is enabled only when the exact repository environment subject is supplied.
 
-## Files
+All `.tf` files under `environments/dev` form one configuration. The independent
+`bootstrap` root owns private state storage. State/plan files and local `.tfvars`
+are ignored; provider lockfiles are committed. State includes the SMB key and
+sign-in credential, so never print/upload it in CI. See [state recovery](remote-state.md).
 
-All `.tf` files in `environments/dev/` form one Terraform configuration.
-Splitting them by purpose helps us read them; file names do not control order.
+## Validate locally without Azure access
 
-- `versions.tf`: Terraform and AzureRM provider version constraints.
-- `backend.tf`: private Azure Blob state storage using your Azure CLI identity.
-- `authentication.tf`: Entra browser sign-in, credential rotation and ingress authorization.
-- `providers.tf`: configures the provider that communicates with Azure.
-- `variables.tf`: inputs, starting with the Azure region.
-- `main.tf`: the resource we want Terraform to manage.
-- `registry.tf`: the image registry and its deterministic name suffix.
-- `identity.tf`: the managed identity and its registry-scoped pull permission.
-- `container_app.tf`: the logging workspace, hosting environment and API runtime.
-- `storage.tf`: the reference-data account, file share and read-only environment mount.
-- `outputs.tf`: values Terraform shows after deployment.
-
-We use AzureRM 4.x for infrastructure, AzureAD 3.x for Entra registrations, AzAPI
-2.x for Container Apps authentication and the time provider for credential rotation.
-Commit `.terraform.lock.hcl` after initialization to record exact provider versions
-and checksums. Modules will be introduced
-when we have reusable infrastructure; this first step needs none.
-
-## Local validation
-
-Install Terraform using https://developer.hashicorp.com/terraform/install
-and Azure CLI using https://learn.microsoft.com/cli/azure/install-azure-cli.
-The Azure CLI is needed for login and planning, not for these local checks:
+Install Terraform 1.16.4 (compatible range 1.9–<2), Python 3.12 and Azure CLI.
+From the repo root:
 
 ```bash
-terraform -chdir=terraform/environments/dev init -backend=false
-terraform -chdir=terraform/environments/dev fmt -check
-terraform -chdir=terraform/environments/dev validate
+terraform fmt -check -recursive terraform
+for root in terraform/bootstrap terraform/environments/dev; do
+  task_data=$(mktemp -d)
+  TF_DATA_DIR="$task_data" terraform -chdir="$root" init -backend=false -lockfile=readonly
+  TF_DATA_DIR="$task_data" terraform -chdir="$root" validate
+  rm -rf "$task_data"
+done
 ```
 
-`init` downloads the provider. `fmt` checks formatting. `validate` checks the
-configuration against the provider's schema. None of these create Azure resources.
+Use a separate provider directory for backend-free validation so it does not
+disturb the initialized working backend. These checks create no Azure resources.
 
-## Everyday workflow
+## Work on this existing environment
 
-Edit the `.tf` files, then run:
-
-```bash
-terraform -chdir=terraform/environments/dev apply
-```
-
-Terraform refreshes state and shows a fresh plan. Review it, then type `yes` if
-the changes are expected. `No changes` means Azure already matches the
-configuration; there is nothing to approve or deploy. Uploading files into a
-share is a separate operation from creating that share.
-
-Saved plans are optional. They are useful when you want to apply the exact plan
-reviewed earlier, for example in CI. Commit `.tf` files and `.terraform.lock.hcl`;
-keep `.terraform/`, `*.tfplan` and Terraform state out of Git.
-
-## Saved plans after a successful apply
-
-A saved plan belongs to the Terraform state snapshot used when it was generated.
-A successful apply updates state, so applying that same file again reports
-`Saved plan is stale`. The first successful deployment is still intact.
-Generate a fresh plan to check the current deployment:
-
-```bash
-terraform -chdir=terraform/environments/dev plan
-```
-
-If it reports `No changes`, no apply is needed. For a later configuration change,
-use interactive `apply` or generate and review a new saved plan.
-
-## Next step: inspect an Azure plan
-
-Once the tools are installed, authenticate interactively and select the subscription:
+Use the developer Azure identity with backend access and directory permissions:
 
 ```bash
 az login
-az account list --output table
-az account set --subscription "YOUR_SUBSCRIPTION_ID"
-export ARM_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
+az account set --subscription YOUR_SUBSCRIPTION_ID
+export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+terraform -chdir=terraform/environments/dev init -lockfile=readonly
 terraform -chdir=terraform/environments/dev plan
-```
-
-Review the plan before applying. Once all the resources below are deployed,
-a fresh plan should report `No changes`.
-The AzureRM 4.x provider requires an explicit subscription ID; the environment
-variable supplies it without embedding account details in the configuration.
-Automatic resource-provider registration is disabled. Check that
-`Microsoft.ContainerRegistry` is registered before creating the registry:
-
-```bash
-az provider show --namespace Microsoft.ContainerRegistry --query registrationState --output tsv
-```
-
-If it is not `Registered`, explicitly register it before applying:
-
-```bash
-az provider register --namespace Microsoft.ContainerRegistry --wait
-```
-
-This registration enables the Azure service in the selected subscription.
-The registry itself is a paid resource once created. Basic is the starting
-tier for this development workload. The shared registry admin account is
-disabled; we will authenticate using Azure CLI and Azure roles.
-
-The name starts with `acrswisstaxdev` and ends with eight characters derived
-from the resource group's ID to reduce global name collisions. The suffix is
-stable for this resource group.
-
-To save and apply a reviewed registry plan:
-
-```bash
-terraform -chdir=terraform/environments/dev plan -out=registry.tfplan
-terraform -chdir=terraform/environments/dev apply registry.tfplan
-terraform -chdir=terraform/environments/dev output container_registry_name
-terraform -chdir=terraform/environments/dev output container_registry_login_server
-```
-
-Creating a registry does not upload an image. Building and pushing the image
-is the next step after creation.
-
-Terraform now uses a private Azure Blob backend, authenticated through your Azure
-CLI identity. The independent [bootstrap configuration](bootstrap/README.md)
-manages its storage and has its own state blob. Existing local state was migrated
-with resource records preserved. See [remote state](remote-state.md) for the
-migration, backups and normal workflow. State and saved plans remain outside Git.
-
-## Managed identity for image pulls
-
-`id-swiss-tax-statement-pull-dev` is an Azure-managed application identity.
-Azure manages its credentials. We will attach it to the Container App and use
-it for registry authentication when adding the runtime.
-
-The role assignment grants `AcrPull` at the registry's resource ID, allowing
-image downloads from this registry without granting push or subscription-wide
-permissions. The registry uses `LegacyRegistryPermissions`, where this role
-applies. ARM audience authentication is explicitly enabled on the registry,
-as required for Container Apps managed identity pulls.
-
-Check that the managed identity service is registered:
-
-```bash
-az provider show --namespace Microsoft.ManagedIdentity --query registrationState --output tsv
-```
-
-If it is not `Registered`, run:
-
-```bash
-az provider register --namespace Microsoft.ManagedIdentity --wait
-```
-
-Save and review this step's plan:
-
-```bash
-terraform -chdir=terraform/environments/dev plan -out=identity.tfplan
-terraform -chdir=terraform/environments/dev apply identity.tfplan
-```
-
-The account applying the plan needs permission to create role assignments at
-the registry scope, such as Owner or Role Based Access Control Administrator.
-Contributor alone cannot create this role assignment. New Azure role assignments
-can take time to propagate; the actual managed identity image pull will be
-verified when the Container App is deployed.
-
-`registry_pull_identity_id` is the Azure resource ID used to attach the identity.
-`registry_pull_identity_principal_id` identifies its Microsoft Entra principal
-for permissions. These IDs serve different purposes; neither is a password.
-
-Reference: https://learn.microsoft.com/azure/container-apps/managed-identity-image-pull
-
-## First Container App runtime
-
-This step creates three resources:
-
-- `log-swiss-tax-statement-dev`: stores runtime logs with 30-day retention.
-- `cae-swiss-tax-statement-dev`: hosts apps using a Consumption workload profile.
-- `ca-swiss-tax-statement-api-dev`: runs the verified API image with the existing
-  identity for registry pulls.
-
-The API image is pinned by digest through `api_image_digest`. We start with one
-replica, 0.5 vCPU and 1 GiB memory so the runtime remains available for CLI checks.
-This incurs runtime charges while active; log ingestion is also metered.
-Scale-to-zero will be configured when the access path is ready.
-
-Ingress is internal to this Container Apps environment. Its hostname will not
-serve the API to your laptop's browser. `/health` probes verify that the process
-starts and responds; they do not assert that tax-processing data is installed.
-Official Kursliste data is not mounted yet, so this step verifies startup and
-managed identity image pulls. Statement processing in Azure is a later step.
-
-Both Azure services below must be registered before applying:
-
-```bash
-az provider register --namespace Microsoft.App --wait
-az provider register --namespace Microsoft.OperationalInsights --wait
-terraform -chdir=terraform/environments/dev plan -out=runtime.tfplan
-terraform -chdir=terraform/environments/dev apply runtime.tfplan
-```
-
-Verify the deployed runtime:
-
-```bash
-az containerapp show --name ca-swiss-tax-statement-api-dev \
-  --resource-group rg-swiss-tax-statement-dev \
-  --query '{state:properties.provisioningState,revision:properties.latestReadyRevisionName}' \
-  --output table
-az containerapp logs show --name ca-swiss-tax-statement-api-dev \
-  --resource-group rg-swiss-tax-statement-dev --type console --tail 20
-```
-
-Azure CLI may prompt to install its Container Apps extension. A ready revision
-and passing health probes are the initial success criteria. Authentication and
-persistent data provisioning will follow before real statements are processed.
-
-## Persistent Kursliste storage
-
-This step creates a Standard LRS storage account and a 5 GiB SMB file share for
-public reference data. The Container App mounts it read-only at `/data/kursliste`.
-The upstream reader prefers SQLite when both SQLite and XML are present; only
-the converted database needs uploading. The storage account's authenticated
-public network endpoint is needed for this environment without a custom VNet.
-
-The Azure Files SMB mount uses a storage account key in the environment's storage
-binding. Terraform marks the value sensitive but stores it in state and saved
-plans. Those files are already ignored by Git; the next infrastructure step is
-migrating state to a restricted Azure backend. No storage key is an output or a
-literal in configuration. The managed identity continues to handle image pulls.
-
-Deploy the storage configuration after reviewing the plan:
-
-```bash
-az provider register --namespace Microsoft.Storage --wait
 terraform -chdir=terraform/environments/dev apply
 ```
 
-An empty share does not make statement processing ready. After applying, upload
-the official database downloaded during local setup:
+Inspect the fresh plan before confirming. `No changes` means nothing needs
+deployment. Saved `.tfplan` files are optional; keep them private, use a freshly
+reviewed one once, and regenerate after state changes. Never disable state locking.
 
-```bash
-kursliste_account=$(terraform -chdir=terraform/environments/dev output -raw reference_data_storage_account_name)
-kursliste_md5=$(.venv/bin/python -c 'import base64,hashlib; f=open("data/kursliste/kursliste_2025.sqlite","rb"); print(base64.b64encode(hashlib.file_digest(f,"md5").digest()).decode())')
+| Input | Purpose |
+| --- | --- |
+| `api_image_digest` | Verified ACR image to deploy; digest validation enforced |
+| `allowed_user_object_ids` | Nonempty explicit Entra user allowlist |
+| `kursliste_directory` | Immutable data directory within the read-only mount |
+| `min_replicas` | 0 normally, 1 temporarily for CLI diagnostic access |
+| `monthly_budget` | Notification budget in billing currency, not a spending cap |
+| `notification_email` | Optional private email for budget/error delivery |
+| `github_oidc_subject` | Exact azure-dev environment subject; null disables identity |
 
-az storage file upload --account-name "$kursliste_account" \
-  --share-name kursliste --source data/kursliste/kursliste_2025.sqlite \
-  --path kursliste_2025.sqlite --auth-mode key \
-  --content-md5 "$kursliste_md5" --validate-content --output none
+Use ignored `environments/dev/dev.auto.tfvars` for persistent private choices.
+Environment overrides use `TF_VAR_<name>`. Keep these choices present on every
+future plan; removing an OIDC/email override can plan deletion of its resources.
+GitHub's image workflow reads the committed image default rather than local
+private overrides. See [release setup](../docs/github-release.md).
 
-az storage file show --account-name "$kursliste_account" \
-  --share-name kursliste --path kursliste_2025.sqlite --auth-mode key \
-  --query '{bytes:properties.contentLength,md5:properties.contentSettings.contentMd5}' \
-  --output json
-```
+Azure providers are explicitly registered by the developer; automatic registration
+is disabled. Required namespaces include Microsoft.Storage, ContainerRegistry,
+ManagedIdentity, App, OperationalInsights, Insights and Consumption. Entra app
+registration permissions are separate from Azure resource/role permissions.
 
-Azure CLI obtains the account key using your Azure login; the account needs
-permission to list storage keys. The MD5 verifies transfer integrity, not source
-authenticity. Record the official export metadata and a SHA-256 checksum for
-release provenance. Future refreshes should upload to a versioned folder and
-switch the app's data path only after verification; avoid overwriting a database
-in use by the running app.
+## Deploy in a different Azure subscription
 
-After upload, test synthetic XML inside the deployed container and confirm a
-readable PDF, then compare realistic sanitized portfolio examples before claiming
-tax-calculation correctness. Storage and transactions are metered Azure resources.
+The committed backend names and allowlisted user target the author's environment;
+they are not portable credentials. A new maintainer must create their own backend,
+allowlist and ACR image. Local synthetic checks need none of these Azure resources.
 
-Reference: https://learn.microsoft.com/azure/container-apps/storage-mounts
+1. Copy the `bootstrap` root into an ignored private working directory **without
+   its `backend.tf`**. Initialize/apply there using local state and your own Azure
+   identity. It creates your subscription-derived state account, private container
+   and scoped Blob Data Contributor role. Protect the local state.
+2. Set each root's backend `storage_account_name` to your new account (or use
+   backend configuration overrides). Keep the bootstrap/dev blob keys separate.
+   Add the backend to the working bootstrap copy and run `init -migrate-state`,
+   preserving its existing local state. Copy configuration changes back deliberately.
+3. Obtain your Entra user object ID with `az ad signed-in-user show --query id -o
+   tsv`, set `allowed_user_object_ids` privately, and register service providers.
+4. Create/push your own tested amd64 image into your registry before the runtime
+   is applied. For the initial registry/identity stage, a deliberately scoped
+   bootstrap apply targeting their resources can break this first-image dependency;
+   then return to full plans. Do not use routine targeting for later changes.
+5. Download/verify official public data and upload a release after storage exists.
+   Review the full development plan. Ensure its image/directory selects your own
+   verified artifacts before accepting the runtime. Set a stable budget start
+   date to the first day of your current billing month for a new deployment.
+6. Verify managed-identity pulls, readiness, Entra login/denial, synthetic PDFs and
+   a clean full plan. Provisioning an empty share alone does not provide data.
 
-## Authentication checkpoint
+Do not connect a new subscription's configuration to the author's backend or
+create fresh empty state for already managed resources. The
+[bootstrap guide](bootstrap/README.md) records the original migration.
 
-Entra sign-in and external HTTPS are deployed. Internal ingress requests and an
-external `/docs` request returned 401 without authentication. The downloaded
-browser-test PDF matches the synthetic fixture. See the
-[authentication guide](../docs/authentication.md) for the access policy,
-credential lifetime and browser verification steps. The ingress hostname output
-is now `container_app_fqdn`; `api_url` supplies its external HTTPS URL.
+## Operations
+
+HTTPS is external but access remains single-tenant and allowlisted. The API uses
+0–1 replicas, 0.5 vCPU, 1 GiB memory, process health and data/schema readiness.
+Kursliste is read-only at `/data/kursliste`; image pulls use managed identity,
+while the SMB mount uses a storage key protected in remote state.
+
+[Data releases](../docs/data-releases.md) · [Operations/rollback](../docs/operations.md)
+· [Full testing guide](../docs/testing-and-publication.md)

@@ -38,4 +38,10 @@ or realistic portfolio calculations.
 For future data releases, upload a new version into a separate directory, verify
 it, and change the app's `KURSLISTE_DIR` to that directory. Retain the previous
 version for rollback. Avoid overwriting a database while a running replica reads
-it. Versioned release automation and refresh checks remain on the roadmap.
+it. The release tool is documented in [data releases](data-releases.md).
+
+On 2026-10-13 the same database passed a completed local SQLite `quick_check` and
+was uploaded to `releases/2025-77a29260f56c/` with its provenance manifest. SHA-256
+is unchanged. Upload ranges used MD5 validation and the remote byte count matched.
+The original root database is retained for rollback. Runtime promotion is recorded
+in the acceptance checklist.

@@ -19,8 +19,13 @@ output "container_registry_login_server" {
 }
 
 output "registry_pull_identity_id" {
-  description = "Managed identity resource ID to attach to the future Container App."
+  description = "Managed identity resource ID attached to the Container App for image pulls."
   value       = azurerm_user_assigned_identity.registry_pull.id
+}
+
+output "github_release_client_id" {
+  description = "Set AZURE_CLIENT_ID in GitHub's azure-dev environment after configuring OIDC."
+  value       = var.github_oidc_subject == null ? null : azuread_application.github_release[0].client_id
 }
 
 output "registry_pull_identity_principal_id" {

@@ -57,7 +57,8 @@ engine.
 
 ## Phase 1 implementation and verification
 
-The local suite now has 55 passing tests. It covers malformed XML, DTD/entity
+The phase 1 suite had 55 passing tests; readiness/body-limit and release-tool
+checks extend that suite. It covers malformed XML, DTD/entity
 rejection (including UTF-16 input), missing/invalid canton, required engine fields,
 missing year/reference data, stale position dates, mismatched account identifiers,
 unsupported asset categories and the exact 10 MiB upload boundary. It also covers
@@ -92,15 +93,15 @@ responses.
 | Response | Meaning |
 | --- | --- |
 | 400 | Wrong filename or malformed/forbidden XML |
-| 413 | Uploaded file exceeds 10 MiB |
+| 413 | Uploaded file exceeds 10 MiB or total request exceeds 12 MiB |
 | 422 | Invalid form/report fields or engine processing failure, including missing currency rates |
 | 503 | Busy processor, missing schemas/year data, or an operating-system availability error |
 | 504 | Engine exceeded the processing timeout |
 | 500 | Engine reported success but produced missing or invalid PDF output |
 
-The file limit is checked after FastAPI parses multipart input; it is not a total
-HTTP body limit before multipart spooling. Add an ingress/body limit before
-expanding beyond the current restricted single-user audience.
+The separate 12 MiB ASGI request limit rejects oversized Content-Length and
+counts streaming chunks before multipart parsing. The 10 MiB XML-file limit is
+checked after parsing. Tests exercise advertised and chunked body overflow.
 
 ## Barcode capacity regression
 
@@ -124,8 +125,8 @@ page was inspected and all three symbols decoded from that page image.
 
 ## Acceptance checks remaining
 
-The code and local tests are complete for this checkpoint. Deploy the new image
-and finish the browser/tax-software checks in [phase 1 acceptance](phase-1-acceptance.md)
+The hardened image has been deployed and synthetic processing checked. Finish
+the browser/tax-software checks in [phase 1 acceptance](phase-1-acceptance.md)
 before marking the whole phase complete. Barcode decoding alone does not prove
 acceptance by the intended tax software.
 
