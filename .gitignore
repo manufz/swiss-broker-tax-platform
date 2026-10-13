@@ -18,6 +18,10 @@ crash.log
 
 # Financial/private data
 data/kursliste/
+data/releases/
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
 private/
 statements/
 uploads/

@@ -471,7 +471,7 @@ wheels = [
 [[package]]
 name = "opensteuerauszug"
 version = "0.1.0"
-source = { git = "https://github.com/vroonhof/opensteuerauszug.git#eeb3b3d790c5ba9c8cd2e256d228d0bae62ec572" }
+source = { git = "https://github.com/vroonhof/opensteuerauszug.git?rev=eeb3b3d790c5ba9c8cd2e256d228d0bae62ec572#eeb3b3d790c5ba9c8cd2e256d228d0bae62ec572" }
 dependencies = [
     { name = "defusedxml" },
     { name = "holidays" },
@@ -954,7 +954,7 @@ dev = [
 requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1" },
     { name = "fastapi", specifier = ">=0.142.2" },
-    { name = "opensteuerauszug", git = "https://github.com/vroonhof/opensteuerauszug.git" },
+    { name = "opensteuerauszug", git = "https://github.com/vroonhof/opensteuerauszug.git?rev=eeb3b3d790c5ba9c8cd2e256d228d0bae62ec572" },
     { name = "pdf417gen", git = "https://github.com/vroonhof/pdf417-py.git?rev=44ce800bf7301ea88aaabd2e1a680238c96fc4a9" },
     { name = "python-multipart", specifier = ">=0.0.32" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0" },

@@ -13,3 +13,10 @@ When updating the engine, review the schemas and validation tests together.
 
 XSD validation checks XML structure and types. It does not establish that tax
 calculations are correct or that a statement is accepted by a tax authority.
+
+The schemas remain attributed to Verein eCH and their authors. eCH-0196's
+content responsibility is the Swiss Tax Conference; its listed author is
+Christian Holzreiter (GFT). Section 5 of the
+[official standard](https://www.ech.ch/sites/default/files/dosvers/hauptdokument/STAN_d_DEF_2022-06-07_eCH-0196_V2.2.0_E-Steuerauszug_.pdf)
+describes reuse/distribution with attribution. The project's MIT license does
+not relicense these schemas. See [third-party notices](../THIRD_PARTY_NOTICES.md).

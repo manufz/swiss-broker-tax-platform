@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm@sha256:34386ef0cb081344d7ec1c103ba398e6e9f64e9ab3a1509accc92a4e24a07258
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -9,7 +9,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir uv
+RUN pip install --no-cache-dir uv==0.11.16
 
 COPY pyproject.toml uv.lock ./
 
@@ -21,6 +21,8 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 COPY app ./app
 COPY specs ./specs
+COPY THIRD_PARTY_NOTICES.md LICENSE ./
+COPY licenses ./licenses
 
 RUN useradd \
     --create-home \

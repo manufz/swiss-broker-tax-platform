@@ -1,7 +1,7 @@
 [project]
 name = "swiss-broker-tax-platform"
 version = "0.1.0"
-description = "Add your description here"
+description = "Authenticated IBKR-to-Swiss-tax-statement API and Azure platform"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-opensteuerauszug = { git = "https://github.com/vroonhof/opensteuerauszug.git" }
+opensteuerauszug = { git = "https://github.com/vroonhof/opensteuerauszug.git", rev = "eeb3b3d790c5ba9c8cd2e256d228d0bae62ec572" }
 pdf417gen = { git = "https://github.com/vroonhof/pdf417-py.git", rev = "44ce800bf7301ea88aaabd2e1a680238c96fc4a9" }
 
 [dependency-groups]
