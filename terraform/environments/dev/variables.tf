@@ -86,6 +86,7 @@ variable "api_image_digest" {
 variable "allowed_user_object_ids" {
   description = "Microsoft Entra user object IDs allowed to access the development API."
   type        = set(string)
+  nullable    = false
 
   validation {
     condition = length(var.allowed_user_object_ids) > 0 && alltrue([

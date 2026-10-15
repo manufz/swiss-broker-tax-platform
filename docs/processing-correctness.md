@@ -55,10 +55,10 @@ especially `calculate/minimal_tax_value.py` and the CLI's calculation-mode
 dispatch in `steuerauszug.py`. Refresh these checks when updating the
 engine.
 
-## Phase 1 implementation and verification
+## Validation coverage
 
-The phase 1 suite had 55 passing tests; readiness/body-limit and release-tool
-checks extend that suite. It covers malformed XML, DTD/entity
+The current suite has 67 passing tests, including readiness, body-limit and
+release-tool checks. It covers malformed XML, DTD/entity
 rejection (including UTF-16 input), missing/invalid canton, required engine fields,
 missing year/reference data, stale position dates, mismatched account identifiers,
 unsupported asset categories and the exact 10 MiB upload boundary. It also covers
@@ -74,7 +74,7 @@ The deployed reference dataset currently covers 2025.
 Processing runs in a worker that owns its temporary directory and a single
 non-blocking capacity slot. A competing job returns 503 with `Retry-After: 5`;
 `/health` remains responsive. This is a limit per API process. Keep one Uvicorn
-worker per replica until scaling/concurrency sizing is reviewed in phase 3.
+worker per replica until scaling and concurrency sizing have been validated.
 
 A 120-second subprocess timeout kills and waits for the engine. Tests exercise a
 real sleeping child and check that it is gone and partial output removed. On HTTP

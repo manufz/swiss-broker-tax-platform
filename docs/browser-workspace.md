@@ -6,10 +6,9 @@ the same-origin `POST /v1/statements` endpoint; `/docs` remains the developer AP
 interface. There is no separate frontend deployment or external asset service.
 
 The page presents the broader problem: international broker exports need to be
-adapted for a Swiss tax-reporting workflow. Interactive Brokers is marked
-supported, with a quiet note that more brokers are coming soon. Additional broker
-integrations and direct account retrieval remain separate future work, not
-available features. The existing calculation limitations remain visible.
+adapted for a Swiss tax-reporting workflow. Interactive Brokers Flex XML imports
+are supported. Additional broker integrations and direct account retrieval remain
+separate planned features. The calculation limitations remain visible.
 
 ## Try it
 

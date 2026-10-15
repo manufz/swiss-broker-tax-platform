@@ -1,0 +1,4 @@
+# Copy to dev.auto.tfvars for a new checkout; preserve existing private settings.
+# Obtain the ID with: az ad signed-in-user show --query id --output tsv
+# Replace the placeholder before running plan or apply.
+allowed_user_object_ids = ["YOUR_ENTRA_USER_OBJECT_ID"]

@@ -26,37 +26,28 @@ credentials are not embedded there. Never publish state or print its contents in
 CI. Blob versioning and seven-day soft deletion provide recovery options; older
 versions also contain sensitive values and incur storage charges.
 
-## Migration performed
+## Migration and recovery
 
-Before migration, the original development and bootstrap state files were copied
-into `private/terraform-state-backups/20261007T130101692500Z/`, with owner-only
-file permissions. That directory is ignored by Git. The backup includes a
-manifest of lineages, serials and checksums. Retain it as a protected recovery
-copy, not as a second active state.
+Before changing backends, keep an access-controlled state snapshot with its
+lineage, serial and checksum. Treat recovery copies as sensitive and keep them
+outside version control; use only one authoritative active state.
 
-After checking identity access and confirming that the destination was empty,
-each root received its `backend.tf` and ran:
+Confirm that the destination is empty and the applying identity can access it,
+then migrate each root deliberately:
 
 ```bash
 terraform -chdir=terraform/environments/dev init -migrate-state
 terraform -chdir=terraform/bootstrap init -migrate-state
 ```
 
-The migration prompts were answered `yes` to copy the existing states. Both
-remote states were compared with their backups: all resource records, outputs
-and lineages matched. State serials advanced from 16 to 17 for development and
-5 to 6 for bootstrap. Serial changes record a state write; they do not mean that
-Azure resources were redeployed.
-
-The Azure backend acquires blob leases for state locking. A contention check
-temporarily leased the development state blob: Terraform rejected a second
-operation with `Error acquiring the state lock`. The diagnostic lease was then
-released. Fresh plans for both roots returned exit code 0 and `No changes`,
-verifying that migration preserved the managed infrastructure.
+After migration, compare resource records, outputs and lineages against the
+snapshot, and run a fresh plan for each root. An advanced serial records a state
+write and does not by itself indicate an infrastructure change. Verify state
+locking without leaving a diagnostic lease active.
 
 Use `-migrate-state` when moving an existing state to another backend.
 `-reconfigure` updates backend settings without copying old state; it is not a
-replacement for migration. Do not restore a local backup while continuing to
+replacement for migration. Do not restore a local snapshot while continuing to
 operate on remote state. Recovery should deliberately select one authoritative
 state, preserve its lineage and check the resulting plan before an apply.
 

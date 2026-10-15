@@ -16,13 +16,11 @@ The current deployment's billing currency was verified as EUR, so its default
 budget is EUR 25 per month.
 
 The error action group defaults to subscription Owners when no explicit address
-is configured. The developer has now configured an explicit receiver in ignored,
-owner-only `dev.auto.tfvars`; the same private setting also supplies budget email.
-The Terraform input is sensitive, and no recipient address belongs in tracked
-files. Confirm actual delivery with the portal action-group test and complete any
-Azure email verification request. Git commit metadata must also use a private
-GitHub no-reply identity before publication; ignoring settings alone does not
-remove personal addresses already in history.
+is configured. Set `notification_email` in ignored, owner-only `dev.auto.tfvars`
+to use an explicit receiver for both budget and processing alerts. The Terraform
+input is sensitive; keep recipient addresses out of tracked files. Confirm
+delivery with the portal action-group test and complete any Azure receiver
+verification required.
 
 The error alert checks every five minutes for three engine/server 5xx events in
 fifteen minutes. Busy events and invalid-input 4xx are excluded. A dead process

@@ -31,6 +31,16 @@ disturb the initialized working backend. These checks create no Azure resources.
 
 ## Work on this existing environment
 
+`allowed_user_object_ids` is required and has no default. Set it in ignored
+`environments/dev/dev.auto.tfvars` before planning. For a new checkout, copy
+`environments/dev/dev.auto.tfvars.example` and replace the placeholder with the
+authorized Entra user object ID. Existing checkouts should preserve their private
+settings rather than overwriting the file. Obtain the current user's ID with:
+
+```bash
+az ad signed-in-user show --query id --output tsv
+```
+
 Use the developer Azure identity with backend access and directory permissions:
 
 ```bash
@@ -69,7 +79,7 @@ registration permissions are separate from Azure resource/role permissions.
 
 ## Deploy in a different Azure subscription
 
-The committed backend names and allowlisted user target the author's environment;
+The committed backend names target the reference development environment;
 they are not portable credentials. A new maintainer must create their own backend,
 allowlist and ACR image. Local synthetic checks need none of these Azure resources.
 

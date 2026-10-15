@@ -62,8 +62,6 @@ example and interface preview without an Azure account:
 
 ![Browser upload workspace](docs/assets/upload-workspace.jpg)
 
-Layout preview captured before the international-broker messaging update.
-
 The dedicated workspace is deployed on Azure at `/` (2026-10-15). It uses the
 same processing API; `/docs` remains available for developers. Sign-in returns
 to the workspace. Direct IBKR connection is planned.
