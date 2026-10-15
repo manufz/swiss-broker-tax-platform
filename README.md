@@ -54,7 +54,7 @@ flowchart LR
 [Architecture/data flow](docs/architecture.md) · [Security model](docs/security.md)
 · [Design decisions](docs/decisions.md)
 
-## Demo and current status
+## Demo
 
 The Azure development service is protected by a single-user Entra policy; it is
 not an anonymous public demo. Employers can inspect the source, synthetic
@@ -62,7 +62,7 @@ example and interface preview without an Azure account:
 
 ![Browser upload workspace](docs/assets/upload-workspace.jpg)
 
-The dedicated workspace is deployed on Azure at `/` (2026-10-15). It uses the
+The dedicated workspace is deployed on Azure at `/`. It uses the
 same processing API; `/docs` remains available for developers. Sign-in returns
 to the workspace. Direct IBKR connection is planned.
 See [workspace behavior and checks](docs/browser-workspace.md).
@@ -72,14 +72,17 @@ See [workspace behavior and checks](docs/browser-workspace.md).
 [Synthetic sample PDF](examples/synthetic-basic-2025.pdf) ·
 [Synthetic input XML](tests/fixtures/ibkr_synthetic.xml)
 
-The test suite covers expected cash/holdings/trades, input and schema failures,
+The 67 automated tests cover expected cash/holdings/trades, input and schema failures,
 timeouts/concurrency/cancellation, temporary-file cleanup, privacy and decoded
-barcodes. Deployed synthetic processing and unauthenticated access checks are
-recorded in [acceptance evidence](docs/phase-1-acceptance.md). Browser logout and
-rejection of another signed-in identity require manual acceptance. Destination tax-software
-import is an optional interoperability check, outside the current platform-test
-scope. GitHub workflows are prepared; their first hosted runs happen after
-publication and environment setup. See [release status](docs/roadmap.md).
+barcodes. See [processing correctness](docs/processing-correctness.md) for the
+expected fixture values, validation coverage and calculation limits.
+
+## Status & next steps
+
+- Deployed Azure MVP with IBKR Flex XML upload and PDF generation.
+- Signed-in browser access checks remain pending.
+- Hosted CI/CD release cycle remains to be verified.
+- Planned: IBKR Flex Web Service retrieval and additional broker integrations.
 
 ## Try locally without Azure or personal data
 
@@ -141,8 +144,8 @@ terraform fmt -check -recursive terraform
 python3 scripts/audit_publication.py
 ```
 
-[Full test and publication guide](docs/testing-and-publication.md) includes
-Docker, Azure sign-in, denial checks, cold starts, alerts and actual PDF import.
+[Browser workspace](docs/browser-workspace.md) · [Authentication](docs/authentication.md)
+· [Operations and rollback](docs/operations.md)
 
 ## Supported input and limits
 
@@ -164,7 +167,7 @@ tests/         synthetic fixtures and integration/robustness tests
 terraform/     bootstrap state and development infrastructure
 scripts/       smoke checks, data releases and publication audit
 .github/       CI and manual release workflows
-docs/          architecture, acceptance, security and operations
+docs/          architecture, processing correctness, security and operations
 examples/      fictional sample output for reviewers
 ```
 

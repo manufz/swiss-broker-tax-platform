@@ -6,6 +6,30 @@ base-image digest, uv version and Git revisions are pinned. Debian mirrors are
 not snapshotted, so builds are not guaranteed byte-identical; record each tested
 image's digest. Never expose Terraform state or saved plans to CI.
 
+## Manual image publishing
+
+From the repository root, commit the application source and use a new commit tag
+for each release. Test the exact Linux amd64 image before uploading it:
+
+```bash
+registry_name=$(terraform -chdir=terraform/environments/dev output -raw container_registry_name)
+registry_server=$(terraform -chdir=terraform/environments/dev output -raw container_registry_login_server)
+image_tag=$(git rev-parse --short HEAD)
+image_ref="$registry_server/swiss-tax-statement-api:$image_tag"
+
+docker build --platform linux/amd64 -t "$image_ref" .
+bash scripts/docker_smoke.sh "$image_ref"
+az acr login --name "$registry_name"
+docker push "$image_ref"
+az acr repository show --name "$registry_name" \
+  --image "swiss-tax-statement-api:$image_tag" --query digest --output tsv
+```
+
+Do not overwrite release tags. Set `api_image_digest` to the returned digest,
+review the Terraform plan and apply it to promote the image. Retain the previous
+image and reference-data release for rollback. Registry upload alone does not
+deploy the application.
+
 ## One-time setup after publication
 
 1. Create a GitHub environment `azure-dev`, restricted to `main`. Add environment

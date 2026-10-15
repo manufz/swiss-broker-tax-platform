@@ -1,11 +1,11 @@
-# Processing correctness checkpoint
+# Processing correctness
 
-The API currently runs the pinned engine in `minimal` mode. Its first-release
+The API currently runs the pinned engine in `minimal` mode. Its
 output is an import document for tax software. A successful response means the
 engine produced a PDF and validated its eCH XML; it does not mean the engine
 calculated complete securities income.
 
-## What this checkpoint verifies
+## Synthetic portfolio expectations
 
 `tests/fixtures/ibkr_portfolio_synthetic.xml` contains invented account data,
 one invented US share, a purchase and sale, dividend, withholding and interest.
@@ -123,12 +123,7 @@ and checks byte-for-byte equality with the final eCH XML. The API test also read
 holdings and amounts from the decoded payload. The rendered synthetic barcode
 page was inspected and all three symbols decoded from that page image.
 
-## Acceptance checks remaining
-
-The hardened image has been deployed and synthetic processing checked. Finish
-the browser/tax-software checks in [phase 1 acceptance](phase-1-acceptance.md)
-before marking the whole phase complete. Barcode decoding alone does not prove
-acceptance by the intended tax software.
+## Scope and limitations
 
 Corporate actions, derivatives, short positions and post-year-end corrections
 need dedicated portfolio cases before claiming those workflows are validated.

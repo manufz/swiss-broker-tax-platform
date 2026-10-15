@@ -15,13 +15,6 @@ the separate state-storage group. Cost reporting/notifications can be delayed.
 The current deployment's billing currency was verified as EUR, so its default
 budget is EUR 25 per month.
 
-The error action group defaults to subscription Owners when no explicit address
-is configured. Set `notification_email` in ignored, owner-only `dev.auto.tfvars`
-to use an explicit receiver for both budget and processing alerts. The Terraform
-input is sensitive; keep recipient addresses out of tracked files. Confirm
-delivery with the portal action-group test and complete any Azure receiver
-verification required.
-
 The error alert checks every five minutes for three engine/server 5xx events in
 fifteen minutes. Busy events and invalid-input 4xx are excluded. A dead process
 that produces no logs needs separate revision/readiness diagnosis.
@@ -63,26 +56,15 @@ ContainerAppConsoleLogs_CL
 
 Before each release, record the old image digest and data directory. Restore
 them in Terraform, review/apply, then check health, synthetic processing, 401s and
-a clean plan. The October 8 release used
-`sha256:1185602b5e73048c2ef42396900feeee34a03ec7f81cd1b146e061219d11afc1`
-with `/data/kursliste`; it lacks `/ready`, so set `readiness_probe_path` to
-`/health` if returning to that older image. Newer releases use `/ready`.
+a clean plan. Use the previously verified `api_image_digest` and
+`kursliste_directory`; select a `readiness_probe_path` supported by that image.
+Older images without `/ready` require `/health` instead. If the browser entry
+point differs, restore the matching Entra homepage and sign-in return URL too.
 
-For that specific older checkpoint, review the plan first, then use the same
-overrides on apply:
-
-```bash
-terraform -chdir=terraform/environments/dev plan \
-  -var=api_image_digest=sha256:1185602b5e73048c2ef42396900feeee34a03ec7f81cd1b146e061219d11afc1 \
-  -var=kursliste_directory=/data/kursliste -var=readiness_probe_path=/health
-terraform -chdir=terraform/environments/dev apply \
-  -var=api_image_digest=sha256:1185602b5e73048c2ef42396900feeee34a03ec7f81cd1b146e061219d11afc1 \
-  -var=kursliste_directory=/data/kursliste -var=readiness_probe_path=/health
-```
-
-Return to the committed final configuration with a normal reviewed `apply` and
-repeat readiness/processing checks. Temporary command-line overrides deliberately
-differ from the defaults; a normal plan shows the restoration until it is applied.
+Use the same variable values for plan and apply. Return to the committed
+configuration with a reviewed `apply` and repeat readiness/processing checks.
+Temporary overrides deliberately differ from defaults; a subsequent plan shows
+that difference until the configuration is restored.
 
 Check `auth_client_secret_expires_at` monthly. The rotation resource uses 150 days
 with 180-day validity, but rotation happens only when Terraform runs. Apply before

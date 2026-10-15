@@ -116,4 +116,4 @@ Kursliste is read-only at `/data/kursliste`; image pulls use managed identity,
 while the SMB mount uses a storage key protected in remote state.
 
 [Data releases](../docs/data-releases.md) · [Operations/rollback](../docs/operations.md)
-· [Full testing guide](../docs/testing-and-publication.md)
+· [Local checks](../README.md#checks) · [Authentication](../docs/authentication.md)
