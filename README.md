@@ -1,8 +1,8 @@
 # Swiss Broker Tax Platform
 
 An authenticated platform for converting **international broker exports → Swiss
-tax-statement PDFs**. **Interactive Brokers is the first implemented broker**,
-using annual Flex XML exports; additional broker integrations are planned.
+tax-statement PDFs**. Currently supports **Interactive Brokers** annual Flex XML
+exports, with additional broker integrations planned.
 The service is deployed on Azure Container Apps and managed with Terraform.
 A platform-engineering portfolio project covering infrastructure, identity,
 reproducible releases, processing isolation, observability and cost controls.

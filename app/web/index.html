@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Turn international broker exports into Swiss tax-statement documents. Interactive Brokers is the first supported broker, with annual Flex XML imports."
+      content="Turn international broker exports into Swiss tax-statement documents. Supports annual Flex XML imports from Interactive Brokers."
     />
     <meta name="theme-color" content="#f7f7f2" />
     <title>Swiss Tax Statements · Broker Tax Platform</title>
@@ -48,11 +48,10 @@
         </div>
         <div class="intro-note">
           <span class="note-line" aria-hidden="true"></span>
-          <span class="small-label">FIRST SUPPORTED BROKER</span>
+          <span class="small-label">SUPPORTED BROKERS</span>
           <p>
             <strong>Interactive Brokers</strong><br />Annual Flex XML imports
           </p>
-          <span class="small-label">MORE BROKERS PLANNED</span>
         </div>
       </section>
 
@@ -82,11 +81,11 @@
               <span class="broker-monogram" aria-hidden="true">IB</span>
               <div>
                 <strong>Interactive Brokers</strong>
-                <span>First broker integration · Flex XML</span>
+                <span>Flex XML export</span>
               </div>
-              <span class="broker-status">Available</span>
+              <span class="broker-status">Supported</span>
             </div>
-            <p>Support for additional international brokers is planned.</p>
+            <p>More brokers coming soon.</p>
           </div>
           <form id="statement-form" novalidate>
             <label class="drop-zone" id="drop-zone" for="statement-file">
@@ -290,10 +289,9 @@
               Which brokers are supported?<span aria-hidden="true">+</span>
             </summary>
             <p>
-              Interactive Brokers is the first implemented broker. Its annual
-              Flex XML exports can be converted today. Integrations for
-              additional international brokers are planned; their documents
-              cannot be processed yet.
+              You can currently import annual Flex XML exports from Interactive
+              Brokers. More broker integrations are planned. Exports from other
+              brokers are not supported yet.
             </p>
           </details>
           <details>
