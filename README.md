@@ -13,6 +13,8 @@ processing isolation, observability and cost controls.
 
 - FastAPI upload boundary with secure XML parsing, annual-report/account/canton
   checks, bounded multipart bodies and useful static errors.
+- A responsive browser workspace with drag-and-drop XML upload, tax-year
+  selection, a fictional demo, processing feedback and PDF download.
 - Subprocess isolation, one-job concurrency, a 120-second timeout, safe logging,
   cancellation-aware cleanup and non-root Linux containers.
 - A Macro PDF417 capacity fix, covered by decoded XML round-trip tests.
@@ -48,7 +50,14 @@ flowchart LR
 
 The Azure development service is protected by a single-user Entra policy; it is
 not an anonymous public demo. Employers can inspect the source, synthetic
-example and preview without an Azure account:
+example and interface preview without an Azure account:
+
+![Browser upload workspace](docs/assets/upload-workspace.jpg)
+
+The dedicated workspace is available at `/` in the current source. It uses the
+same processing API; `/docs` remains available for developers. This interface
+still needs promotion to the Azure deployment. Direct IBKR connection is planned.
+See [workspace behavior and checks](docs/browser-workspace.md).
 
 ![Synthetic statement preview](docs/assets/synthetic-basic-preview.png)
 
@@ -58,8 +67,8 @@ example and preview without an Azure account:
 The test suite covers expected cash/holdings/trades, input and schema failures,
 timeouts/concurrency/cancellation, temporary-file cleanup, privacy and decoded
 barcodes. Deployed synthetic processing and unauthenticated access checks are
-recorded in [acceptance evidence](docs/phase-1-acceptance.md). Browser logout,
-another signed-in identity require manual acceptance. Destination tax-software
+recorded in [acceptance evidence](docs/phase-1-acceptance.md). Browser logout and
+rejection of another signed-in identity require manual acceptance. Destination tax-software
 import is an optional interoperability check, outside the current platform-test
 scope. GitHub workflows are prepared; their first hosted runs happen after
 publication and environment setup. See [release status](docs/roadmap.md).
@@ -79,8 +88,9 @@ In another terminal, from the repository root:
 python3 scripts/smoke.py
 ```
 
-Or open `http://127.0.0.1:8000/docs`, upload
-`tests/fixtures/ibkr_synthetic.xml`, and choose tax year `2025`. The result
+Or open `http://127.0.0.1:8000/`, choose **Try a synthetic example**, then
+**Generate tax statement** and **Download your PDF**. You can also upload
+`tests/fixtures/ibkr_synthetic.xml` yourself and choose tax year `2025`. The result
 contains fictional account `U0000000`, Example Person, ZH and CHF 1,000 cash.
 The USD portfolio fixture needs `tests/fixtures/kursliste_portfolio` instead.
 Those FX rates are invented for deterministic tests.
@@ -141,7 +151,7 @@ Docker, Azure sign-in, denial checks, cold starts, alerts and actual PDF import.
 ## Repository
 
 ```text
-app/           API, processing lifecycle and barcode adapter
+app/           browser workspace, API, processing lifecycle and barcode adapter
 tests/         synthetic fixtures and integration/robustness tests
 terraform/     bootstrap state and development infrastructure
 scripts/       smoke checks, data releases and publication audit

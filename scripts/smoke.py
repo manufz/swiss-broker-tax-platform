@@ -49,6 +49,15 @@ def main():
         status, _, body = request(args.base_url, path)
         assert status == 200, (path, status)
         print(path, json.loads(body))
+    status, headers, page = request(args.base_url, "/")
+    assert status == 200
+    assert b"Start with your report" in page
+    assert headers["cache-control"] == "no-store"
+    assert "frame-ancestors 'none'" in headers["content-security-policy"]
+    for asset in ("app.css", "app.js", "mark.svg", "ibkr-synthetic-2025.xml"):
+        status, _, content = request(args.base_url, f"/assets/{asset}")
+        assert status == 200 and content, asset
+    print("Browser workspace and bundled assets PASS")
     xml = Path("tests/fixtures/ibkr_synthetic.xml").read_bytes()
     assert upload(args.base_url, b"<broken", 2025)[0] == 400
     assert upload(args.base_url, xml, 2024)[0] == 422

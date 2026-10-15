@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import Response
+from fastapi.responses import HTMLResponse, Response
+from fastapi.staticfiles import StaticFiles
 
 from app.processing import process_statement
 from app.security import BodySizeLimitMiddleware
@@ -20,6 +21,18 @@ app.add_middleware(BodySizeLimitMiddleware)
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MiB
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+WEB_ROOT = Path(__file__).resolve().parent / "web"
+app.mount("/assets", StaticFiles(directory=WEB_ROOT / "assets"), name="assets")
+PAGE_HEADERS = {
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+    "Content-Security-Policy": (
+        "default-src 'none'; script-src 'self'; style-src 'self'; "
+        "img-src 'self'; connect-src 'self'; base-uri 'none'; "
+        "form-action 'self'; frame-ancestors 'none'; object-src 'none'"
+    ),
+}
 SCHEMA_FILES = (
     "eCH-0196-2-2.xsd",
     "eCH-0007-6-0.xsd",
@@ -27,6 +40,26 @@ SCHEMA_FILES = (
     "eCH-0010-7-0.xsd",
     "eCH-0097-4-0.xsd",
 )
+
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+def upload_page() -> HTMLResponse:
+    years = sorted(
+        {
+            year.strip()
+            for year in os.environ.get("SUPPORTED_TAX_YEARS", "2025").split(",")
+            if year.strip().isascii()
+            and year.strip().isdigit()
+            and len(year.strip()) == 4
+            and 2000 <= int(year.strip()) <= 2100
+        },
+        reverse=True,
+    )
+    options = "".join(f'<option value="{year}">{year}</option>' for year in years)
+    page = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    return HTMLResponse(
+        page.replace("<!-- TAX_YEAR_OPTIONS -->", options), headers=PAGE_HEADERS
+    )
 
 
 @app.get("/health")

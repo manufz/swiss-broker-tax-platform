@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Turn your annual IBKR Flex XML report into a Swiss tax-statement PDF. A private Azure platform portfolio project."
+    />
+    <meta name="theme-color" content="#f7f7f2" />
+    <title>Swiss Tax Statements · Broker Tax Platform</title>
+    <link rel="icon" href="/assets/mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/app.css" />
+    <script src="/assets/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#statement-form">Skip to upload</a>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Swiss Tax Statements home"
+        ><span class="swiss-mark" aria-hidden="true"></span
+        ><span>Swiss Tax<span class="brand-light">Statements</span></span></a
+      >
+      <nav aria-label="Main navigation">
+        <a class="nav-active" href="#workspace" aria-current="page">Workspace</a
+        ><a href="#guide">How it works</a
+        ><a href="/docs" class="api-link"
+          >API docs <span aria-hidden="true">↗</span></a
+        >
+      </nav>
+      <span class="edition"
+        >Portfolio edition <span class="edition-dot" aria-hidden="true"></span
+      ></span>
+    </header>
+
+    <main id="workspace" class="page-shell">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">
+            <span class="tiny-cross" aria-hidden="true">+</span> LESS PAPERWORK.
+            MORE CLARITY.
+          </p>
+          <h1 id="page-title">
+            Your investments.<br />Your Swiss tax statement.
+          </h1>
+          <p class="intro-copy">
+            From an annual broker report to a structured PDF.<br
+              class="desktop-break"
+            />
+            A simpler way to prepare your next tax return.
+          </p>
+        </div>
+        <div class="intro-note">
+          <span class="note-line" aria-hidden="true"></span>
+          <p>Built for IBKR Flex XML.<br />Designed around your privacy.</p>
+          <span class="small-label">SWISS BROKER TAX PLATFORM</span>
+        </div>
+      </section>
+
+      <div class="scope-note">
+        <span class="scope-tag">MVP</span>
+        <p>
+          Generates an eCH-0196 import document. Securities income is not
+          calculated; review and complete tax calculations before using the
+          output.
+        </p>
+        <a href="#limitations" aria-label="Read about output limitations"
+          >About the output <span aria-hidden="true">↗</span></a
+        >
+      </div>
+
+      <section class="workspace" aria-label="Create a tax statement">
+        <div class="upload-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">01 / YOUR SOURCE</p>
+              <h2>Start with your report</h2>
+            </div>
+            <span class="file-type">XML</span>
+          </div>
+          <div class="source-options" aria-label="Available report sources">
+            <span class="source-active"
+              ><span aria-hidden="true">↑</span> Upload a file</span
+            ><span class="source-planned"
+              >IBKR connection <span>Planned</span></span
+            >
+          </div>
+          <form id="statement-form" novalidate>
+            <label class="drop-zone" id="drop-zone" for="statement-file">
+              <input
+                id="statement-file"
+                name="statement"
+                type="file"
+                accept=".xml,application/xml,text/xml"
+                aria-describedby="file-help selected-file"
+              />
+              <span class="upload-icon" aria-hidden="true"
+                ><svg viewBox="0 0 32 32" fill="none">
+                  <path
+                    d="M16 21V5m-6 6 6-6 6 6M6 21v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5"
+                  /></svg
+              ></span>
+              <span class="drop-title" id="drop-title"
+                >Drop your Flex report here</span
+              >
+              <span class="drop-description"
+                >or <span class="browse-label">browse files</span> on your
+                device</span
+              >
+              <span class="drop-hint" id="file-help"
+                >IBKR Flex XML · up to 10 MiB</span
+              >
+            </label>
+            <div class="selected-file" id="selected-file" hidden>
+              <span class="file-symbol" aria-hidden="true">XML</span>
+              <div>
+                <strong id="file-name"></strong><span id="file-size"></span>
+              </div>
+              <button
+                class="icon-button"
+                id="remove-file"
+                type="button"
+                aria-label="Remove selected file"
+              >
+                ×
+              </button>
+            </div>
+            <div class="form-options">
+              <div class="year-field">
+                <label for="tax-year">Tax year</label
+                ><select
+                  id="tax-year"
+                  name="tax_year"
+                  aria-describedby="year-help"
+                >
+                  <!-- TAX_YEAR_OPTIONS -->
+                </select>
+              </div>
+              <p id="year-help">
+                Use a complete calendar-year report,<br />1 January through 31
+                December.
+              </p>
+            </div>
+            <button
+              class="primary-button generate-button"
+              id="generate-button"
+              type="submit"
+              disabled
+            >
+              <span id="generate-label">Generate tax statement</span
+              ><span id="generate-icon" aria-hidden="true">↗</span>
+            </button>
+            <p class="form-footnote">
+              No document library. No saved broker credentials.
+            </p>
+            <div class="demo-row">
+              <span>Just exploring?</span
+              ><button class="text-button" id="load-example" type="button">
+                Try a synthetic example <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </form>
+          <noscript
+            ><p class="error-note">
+              Enable JavaScript to use the upload workspace, or use
+              <a href="/docs">API docs</a>.
+            </p></noscript
+          >
+        </div>
+
+        <aside
+          class="result-panel"
+          aria-labelledby="result-title"
+          id="result-panel"
+          data-state="empty"
+        >
+          <div class="section-heading">
+            <p class="eyebrow">02 / YOUR STATEMENT</p>
+            <span class="status-pill" id="result-badge">Awaiting report</span>
+          </div>
+          <div class="document-scene" aria-hidden="true">
+            <div class="document-shadow"></div>
+            <div class="document-paper">
+              <div class="paper-top">
+                <span class="paper-cross">+</span><span>e-Steuerauszug</span>
+              </div>
+              <span class="paper-overline">SWISS TAX STATEMENT</span>
+              <div class="paper-year" id="paper-year">—</div>
+              <div class="paper-rule"></div>
+              <div class="paper-lines">
+                <span></span><span></span><span></span>
+              </div>
+              <div class="paper-table">
+                <span></span><span></span><span></span><span></span><span></span
+                ><span></span>
+              </div>
+              <div class="paper-bottom">
+                <span>PDF / eCH-0196</span><span class="paper-seal">CH</span>
+              </div>
+            </div>
+            <span class="document-caption">PDF + EMBEDDED XML</span>
+          </div>
+          <div
+            class="result-copy"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <h2 id="result-title">Ready when you are.</h2>
+            <p id="result-description">
+              Your generated statement will be available here.<br />Choose a
+              report to get started.
+            </p>
+            <p id="processing-time" class="processing-time" hidden></p>
+          </div>
+          <div id="error-box" class="error-box" role="alert" hidden>
+            <strong id="error-title"
+              >We couldn’t generate your statement.</strong
+            >
+            <p id="error-description"></p>
+            <a
+              id="sign-in-link"
+              href="/.auth/login/aad?post_login_redirect_uri=/"
+              hidden
+              >Sign in again →</a
+            >
+          </div>
+          <a
+            class="primary-button download-button"
+            id="download-button"
+            hidden
+            download
+            >Download your PDF <span aria-hidden="true">↓</span></a
+          >
+          <button
+            class="text-button reset-button"
+            type="button"
+            id="start-over"
+            hidden
+          >
+            Create another statement <span aria-hidden="true">→</span>
+          </button>
+          <div class="output-spec">
+            <span>Output format</span><strong>eCH-0196 · PDF</strong>
+          </div>
+        </aside>
+      </section>
+
+      <section class="trust-strip" aria-label="How your report is handled">
+        <div>
+          <span class="trust-number">01</span>
+          <div>
+            <h3>Temporary by design</h3>
+            <p>Processing files are removed after each job.</p>
+          </div>
+        </div>
+        <div>
+          <span class="trust-number">02</span>
+          <div>
+            <h3>Structured, then validated</h3>
+            <p>Generated XML is checked against eCH schemas.</p>
+          </div>
+        </div>
+        <div>
+          <span class="trust-number">03</span>
+          <div>
+            <h3>Yours to review</h3>
+            <p>Download the PDF and check your results.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="guide" id="guide" aria-labelledby="guide-title">
+        <div>
+          <p class="eyebrow">A LITTLE PREPARATION</p>
+          <h2 id="guide-title">
+            A good report makes<br />a good starting point.
+          </h2>
+          <p>You bring the export.<br />The platform handles the format.</p>
+        </div>
+        <div class="guide-details">
+          <details>
+            <summary>
+              Which document should I upload?<span aria-hidden="true">+</span>
+            </summary>
+            <p>
+              An Interactive Brokers Flex Query export in XML format covering
+              the full tax year. Include account information, cash balances,
+              positions and trades as applicable. PDF and CSV broker reports are
+              not supported.
+            </p>
+          </details>
+          <details>
+            <summary>
+              What needs to be in my Flex report?<span aria-hidden="true"
+                >+</span
+              >
+            </summary>
+            <p>
+              The report must run from 1 January to 31 December of the selected
+              year. Account information must include a Swiss canton, and open
+              positions must be dated 31 December. Use the synthetic example to
+              see a supported export.
+            </p>
+          </details>
+          <details id="limitations">
+            <summary>
+              What does the portfolio MVP calculate?<span aria-hidden="true"
+                >+</span
+              >
+            </summary>
+            <p>
+              This version uses OpenSteuerAuszug’s minimal import mode.
+              Securities income is omitted from the embedded XML and security
+              valuations may be undefined. Review the output and complete
+              matching, valuation and income calculations in a suitable tax
+              workflow. A valid eCH schema does not establish tax-authority
+              acceptance.
+            </p>
+          </details>
+          <details>
+            <summary>
+              Can I connect my IBKR account?<span aria-hidden="true">+</span>
+            </summary>
+            <p>
+              Direct IBKR retrieval is planned. For now, upload a Flex XML
+              export. This workspace never asks for your IBKR password or stores
+              broker credentials.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <span
+        ><span class="tiny-cross" aria-hidden="true">+</span> Swiss Broker Tax
+        Platform</span
+      ><span>FastAPI · Terraform · Azure</span
+      ><a href="/docs">Explore the API <span aria-hidden="true">↗</span></a>
+    </footer>
+  </body>
+</html>

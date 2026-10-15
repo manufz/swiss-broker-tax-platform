@@ -12,7 +12,7 @@ resource "azuread_application" "api_login" {
   prevent_duplicate_names = true
 
   web {
-    homepage_url  = "${local.api_public_url}/docs"
+    homepage_url  = "${local.api_public_url}/"
     redirect_uris = ["${local.api_public_url}/.auth/login/aad/callback"]
 
     # Container Apps uses a hybrid OpenID Connect flow with a client secret.

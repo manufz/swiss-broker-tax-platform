@@ -54,8 +54,8 @@ output "kursliste_share_name" {
 }
 
 output "api_sign_in_url" {
-  description = "Browser sign-in URL that returns to the API's upload/download interface."
-  value       = "${local.api_public_url}/.auth/login/aad?post_login_redirect_uri=/docs"
+  description = "Browser sign-in URL that returns to the upload workspace."
+  value       = "${local.api_public_url}/.auth/login/aad?post_login_redirect_uri=/"
 }
 
 output "api_url" {

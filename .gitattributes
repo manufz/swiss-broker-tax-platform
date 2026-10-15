@@ -1,5 +1,6 @@
 # Generated assets must not undergo text/line-ending conversion.
 *.pdf binary
 *.png binary
+*.jpg binary
 # Preserve the upstream schema files byte-for-byte.
 *.xsd -text

@@ -20,8 +20,10 @@ user. An empty allowlist is rejected during Terraform validation. This user
 identity is separate from the managed identity that pulls images from ACR.
 
 Unauthenticated app requests return HTTP 401. The explicit sign-in URL uses
-`/.auth/login/aad` and returns to `/docs`, where Swagger UI provides the initial
-XML upload/download interaction. No Graph permissions to read user files or mail
+`/.auth/login/aad`. The new workspace configuration returns to `/`; its image and
+homepage changes still need Azure promotion. The earlier deployment returns to
+`/docs`, where Swagger UI provided the initial XML upload/download interaction.
+No Graph permissions to read user files or mail
 are requested. Tokens are not persisted in an EasyAuth token store; browser
 session cookies still authenticate requests.
 
