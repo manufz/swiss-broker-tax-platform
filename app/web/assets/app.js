@@ -119,7 +119,7 @@
     showState(
       "empty",
       "Ready when you are.",
-      "Your generated statement will be available here. Choose a report to get started.",
+      "Your broker data, in a Swiss tax-statement format. Upload a supported export to get started.",
       "Awaiting report",
     );
     updateForm();

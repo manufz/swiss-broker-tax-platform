@@ -5,6 +5,12 @@ JavaScript and fictional sample bundled inside the existing container. It uses
 the same-origin `POST /v1/statements` endpoint; `/docs` remains the developer API
 interface. There is no separate frontend deployment or external asset service.
 
+The page presents the broader problem: international broker exports need to be
+adapted for a Swiss tax-reporting workflow. Interactive Brokers is explicitly the
+first implemented broker, with annual Flex XML imports available now. Additional
+broker integrations and direct account retrieval are presented as separate future
+work, not available features. The existing calculation limitations remain visible.
+
 ## Try it
 
 From the repository root:

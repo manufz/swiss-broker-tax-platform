@@ -200,6 +200,7 @@ summary:focus-visible {
   margin: 20px 0 18px;
 }
 .intro-copy {
+  max-width: 590px;
   font-size: 14px;
   line-height: 1.8;
   color: var(--muted);
@@ -221,7 +222,11 @@ summary:focus-visible {
 .intro-note p {
   font-size: 12px;
   line-height: 1.8;
-  margin: 0 0 15px;
+  margin: 8px 0 12px;
+}
+.intro-note strong {
+  font-size: 14px;
+  font-weight: 550;
 }
 .small-label {
   font-size: 8px;
@@ -299,39 +304,57 @@ h2 {
   font-weight: 600;
   letter-spacing: 0.7px;
 }
-.source-options {
+.broker-support {
+  margin: 23px 0 18px;
+}
+.broker-current {
   display: flex;
   align-items: center;
-  gap: 21px;
-  margin: 25px 0 18px;
-  border-bottom: 1px solid var(--line);
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fbfcf9;
+}
+.broker-monogram {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d8dfd4;
+  border-radius: 4px;
   font-size: 11px;
+  font-weight: 650;
+  color: var(--ink);
+  background: #edf1e9;
+  flex-shrink: 0;
 }
-.source-active {
-  border-bottom: 2px solid var(--ink);
-  padding: 0 0 11px;
-  font-weight: 600;
-  display: flex;
-  gap: 8px;
-  align-items: center;
+.broker-current > div {
+  flex: 1;
+  min-width: 0;
 }
-.source-active > span {
-  font-size: 18px;
-  line-height: 1;
+.broker-current strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 550;
 }
-.source-planned {
-  color: #77817e;
-  padding: 0 0 11px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
+.broker-current > div > span {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
 }
-.source-planned > span {
-  font-size: 8px;
-  letter-spacing: 0.3px;
-  background: #f2f3ee;
-  padding: 1px 5px;
-  border-radius: 3px;
+.broker-status {
+  font-size: 9px;
+  padding: 2px 7px;
+  color: var(--green);
+  background: #e7eee1;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.broker-support > p {
+  margin: 6px 0 0;
+  font-size: 10px;
+  color: var(--muted);
 }
 .drop-zone {
   position: relative;
@@ -967,12 +990,6 @@ h2 {
   .result-panel {
     padding: 26px 22px 20px;
   }
-  .source-options {
-    gap: 13px;
-  }
-  .source-planned {
-    font-size: 10px;
-  }
   .form-options {
     gap: 12px;
   }
@@ -1117,15 +1134,6 @@ h2 {
     font-size: 9px;
   }
   .site-footer > span:nth-child(2) {
-    display: none;
-  }
-  .source-options {
-    gap: 20px;
-  }
-  .source-planned {
-    font-size: 10px;
-  }
-  .desktop-break {
     display: none;
   }
   .demo-row {

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Turn your annual IBKR Flex XML report into a Swiss tax-statement PDF. A private Azure platform portfolio project."
+      content="Turn international broker exports into Swiss tax-statement documents. Interactive Brokers is the first supported broker, with annual Flex XML imports."
     />
     <meta name="theme-color" content="#f7f7f2" />
     <title>Swiss Tax Statements · Broker Tax Platform</title>
@@ -36,23 +36,23 @@
       <section class="intro" aria-labelledby="page-title">
         <div>
           <p class="eyebrow">
-            <span class="tiny-cross" aria-hidden="true">+</span> LESS PAPERWORK.
-            MORE CLARITY.
+            <span class="tiny-cross" aria-hidden="true">+</span> INTERNATIONAL
+            INVESTMENTS. SWISS TAXES.
           </p>
-          <h1 id="page-title">
-            Your investments.<br />Your Swiss tax statement.
-          </h1>
+          <h1 id="page-title">Invest globally.<br />Report in Switzerland.</h1>
           <p class="intro-copy">
-            From an annual broker report to a structured PDF.<br
-              class="desktop-break"
-            />
-            A simpler way to prepare your next tax return.
+            Your broker’s report isn’t a Swiss tax statement.<br />
+            Turn supported international broker exports into a Swiss
+            tax-statement PDF, with structured data for your tax return.
           </p>
         </div>
         <div class="intro-note">
           <span class="note-line" aria-hidden="true"></span>
-          <p>Built for IBKR Flex XML.<br />Designed around your privacy.</p>
-          <span class="small-label">SWISS BROKER TAX PLATFORM</span>
+          <span class="small-label">FIRST SUPPORTED BROKER</span>
+          <p>
+            <strong>Interactive Brokers</strong><br />Annual Flex XML imports
+          </p>
+          <span class="small-label">MORE BROKERS PLANNED</span>
         </div>
       </section>
 
@@ -72,17 +72,21 @@
         <div class="upload-panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">01 / YOUR SOURCE</p>
+              <p class="eyebrow">01 / INTERNATIONAL BROKER REPORT</p>
               <h2>Start with your report</h2>
             </div>
             <span class="file-type">XML</span>
           </div>
-          <div class="source-options" aria-label="Available report sources">
-            <span class="source-active"
-              ><span aria-hidden="true">↑</span> Upload a file</span
-            ><span class="source-planned"
-              >IBKR connection <span>Planned</span></span
-            >
+          <div class="broker-support" aria-label="Broker support">
+            <div class="broker-current">
+              <span class="broker-monogram" aria-hidden="true">IB</span>
+              <div>
+                <strong>Interactive Brokers</strong>
+                <span>First broker integration · Flex XML</span>
+              </div>
+              <span class="broker-status">Available</span>
+            </div>
+            <p>Support for additional international brokers is planned.</p>
           </div>
           <form id="statement-form" novalidate>
             <label class="drop-zone" id="drop-zone" for="statement-file">
@@ -100,14 +104,14 @@
                   /></svg
               ></span>
               <span class="drop-title" id="drop-title"
-                >Drop your Flex report here</span
+                >Drop your broker export here</span
               >
               <span class="drop-description"
                 >or <span class="browse-label">browse files</span> on your
                 device</span
               >
               <span class="drop-hint" id="file-help"
-                >IBKR Flex XML · up to 10 MiB</span
+                >Currently supported: IBKR Flex XML · up to 10 MiB</span
               >
             </label>
             <div class="selected-file" id="selected-file" hidden>
@@ -174,7 +178,7 @@
           data-state="empty"
         >
           <div class="section-heading">
-            <p class="eyebrow">02 / YOUR STATEMENT</p>
+            <p class="eyebrow">02 / SWISS TAX DOCUMENT</p>
             <span class="status-pill" id="result-badge">Awaiting report</span>
           </div>
           <div class="document-scene" aria-hidden="true">
@@ -207,8 +211,8 @@
           >
             <h2 id="result-title">Ready when you are.</h2>
             <p id="result-description">
-              Your generated statement will be available here.<br />Choose a
-              report to get started.
+              Your broker data, in a Swiss tax-statement format.<br />
+              Upload a supported export to get started.
             </p>
             <p id="processing-time" class="processing-time" hidden></p>
           </div>
@@ -256,8 +260,8 @@
         <div>
           <span class="trust-number">02</span>
           <div>
-            <h3>Structured, then validated</h3>
-            <p>Generated XML is checked against eCH schemas.</p>
+            <h3>Swiss document format</h3>
+            <p>Embedded XML checked against eCH schemas.</p>
           </div>
         </div>
         <div>
@@ -271,13 +275,27 @@
 
       <section class="guide" id="guide" aria-labelledby="guide-title">
         <div>
-          <p class="eyebrow">A LITTLE PREPARATION</p>
+          <p class="eyebrow">BRIDGING THE REPORTING GAP</p>
           <h2 id="guide-title">
-            A good report makes<br />a good starting point.
+            Different broker formats.<br />One Swiss workflow.
           </h2>
-          <p>You bring the export.<br />The platform handles the format.</p>
+          <p>
+            International broker reports use their own structures.<br />
+            Bring supported exports into a format built for Swiss tax reporting.
+          </p>
         </div>
         <div class="guide-details">
+          <details>
+            <summary>
+              Which brokers are supported?<span aria-hidden="true">+</span>
+            </summary>
+            <p>
+              Interactive Brokers is the first implemented broker. Its annual
+              Flex XML exports can be converted today. Integrations for
+              additional international brokers are planned; their documents
+              cannot be processed yet.
+            </p>
+          </details>
           <details>
             <summary>
               Which document should I upload?<span aria-hidden="true">+</span>
@@ -319,12 +337,15 @@
           </details>
           <details>
             <summary>
-              Can I connect my IBKR account?<span aria-hidden="true">+</span>
+              Do I need to connect a broker account?<span aria-hidden="true"
+                >+</span
+              >
             </summary>
             <p>
-              Direct IBKR retrieval is planned. For now, upload a Flex XML
-              export. This workspace never asks for your IBKR password or stores
-              broker credentials.
+              No. The current workflow uses file uploads from the supported
+              broker. Direct IBKR retrieval is planned separately from support
+              for additional brokers. This workspace never asks for your broker
+              password or stores broker credentials.
             </p>
           </details>
         </div>

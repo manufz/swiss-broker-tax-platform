@@ -1,13 +1,21 @@
 # Swiss Broker Tax Platform
 
-An authenticated **IBKR Flex XML → Swiss tax-statement PDF** service, deployed
-on Azure Container Apps and managed with Terraform. A platform-engineering
-portfolio project covering infrastructure, identity, reproducible releases,
-processing isolation, observability and cost controls.
+An authenticated platform for converting **international broker exports → Swiss
+tax-statement PDFs**. **Interactive Brokers is the first implemented broker**,
+using annual Flex XML exports; additional broker integrations are planned.
+The service is deployed on Azure Container Apps and managed with Terraform.
+A platform-engineering portfolio project covering infrastructure, identity,
+reproducible releases, processing isolation, observability and cost controls.
 
 > Portfolio MVP using the upstream engine's **minimal import mode**. Securities
 > income needs recalculation in the destination tax software. Schema validation
 > and a generated PDF do not establish tax-authority acceptance.
+
+International broker reports use broker-specific formats rather than the Swiss
+tax-statement format. This project bridges that gap by turning supported exports
+into a PDF with embedded eCH-0196 data for a Swiss tax-reporting workflow.
+The current implementation supports IBKR Flex XML only; it does not accept
+arbitrary broker PDFs, CSVs or exports from other brokers yet.
 
 ## What I built
 
@@ -53,6 +61,8 @@ not an anonymous public demo. Employers can inspect the source, synthetic
 example and interface preview without an Azure account:
 
 ![Browser upload workspace](docs/assets/upload-workspace.jpg)
+
+Layout preview captured before the international-broker messaging update.
 
 The dedicated workspace is available at `/` in the current source. It uses the
 same processing API; `/docs` remains available for developers. This interface

@@ -20,7 +20,7 @@ def test_workspace_is_served_with_local_assets_and_private_page_headers(monkeypa
     assert response.headers["referrer-policy"] == "no-referrer"
     assert '<option value="2025">2025</option>' in response.text
     assert '<script src="/assets/app.js" defer></script>' in response.text
-    assert "Securities income is not calculated" in response.text
+    assert "Securities income is not calculated" in " ".join(response.text.split())
     for asset in ("app.js", "app.css", "mark.svg"):
         assert client.get(f"/assets/{asset}").status_code == 200
     assert client.get("/assets/../main.py").status_code == 404
