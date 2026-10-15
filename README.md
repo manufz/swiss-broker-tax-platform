@@ -64,9 +64,9 @@ example and interface preview without an Azure account:
 
 Layout preview captured before the international-broker messaging update.
 
-The dedicated workspace is available at `/` in the current source. It uses the
-same processing API; `/docs` remains available for developers. This interface
-still needs promotion to the Azure deployment. Direct IBKR connection is planned.
+The dedicated workspace is deployed on Azure at `/` (2026-10-15). It uses the
+same processing API; `/docs` remains available for developers. Sign-in returns
+to the workspace. Direct IBKR connection is planned.
 See [workspace behavior and checks](docs/browser-workspace.md).
 
 ![Synthetic statement preview](docs/assets/synthetic-basic-preview.png)

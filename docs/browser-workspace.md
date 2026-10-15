@@ -51,15 +51,19 @@ Direct IBKR retrieval is explicitly marked planned and is not implemented.
 
 ## Release status
 
-Implemented and tested locally on 2026-10-15. The new page has not been deployed
-to Azure. Terraform's sign-in return URL and Entra homepage now target `/` in
-source; the existing callback and authorization policy are unchanged.
+Deployed on 2026-10-15 from source `d913a2b` to revision
+`ca-swiss-tax-statement-api-dev--0000006`, healthy with 100% traffic. Terraform's
+sign-in return URL and Entra homepage target `/`; the existing callback and
+single-user authorization policy are unchanged. See the verified image digest
+in [image publishing](publishing-image.md#browser-workspace-release-2026-10-15).
 
-For deployment, commit the tested source, follow the existing image publishing
-and digest-promotion workflow, review the Terraform plan and apply it. Verify
-that signed-in users reach `/`, and that unauthenticated `/`, `/assets/app.js`
-and `POST /v1/statements` remain denied. Repeat the upload/download and same-tenant
-allowlist checks; local testing cannot prove Azure ingress authorization.
+For future deployments, commit the tested source, follow the existing image
+publishing and digest-promotion workflow, review the Terraform plan and apply it.
+Unauthenticated `/`, `/assets/app.js`, `/assets/app.css`, `/docs` and
+`POST /v1/statements` returned 401 after this release. The actual Azure policy was
+checked: authentication and HTTPS enabled, Return401 and the same user allowlist.
+Signed-in browser upload/download, logout and same-tenant allowlist acceptance
+still need user participation; internal processing checks do not prove that flow.
 
 Automated route tests cover page security headers, bundled assets, configured
 years, fictional sample parity and preservation of the API contract. The existing
@@ -71,3 +75,9 @@ real PDF generation/download and a visible malformed-XML error. The updated
 Linux amd64 container includes the page/assets and runs the existing processing
 checks as the non-root application user. These are local checks, not evidence of
 an Azure browser session.
+
+After deployment, HTTP checks inside the new Azure revision verified the current
+page wording, exact bundled JavaScript/CSS/example hashes, page security headers,
+health and readiness. Uploading the bundled fictional example returned a no-store
+PDF with five pages and the expected account, year and CHF 1,000 balance. The
+final Terraform plan reported no changes. No personal report was used.

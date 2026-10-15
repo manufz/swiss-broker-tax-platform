@@ -20,11 +20,10 @@ user. An empty allowlist is rejected during Terraform validation. This user
 identity is separate from the managed identity that pulls images from ACR.
 
 Unauthenticated app requests return HTTP 401. The explicit sign-in URL uses
-`/.auth/login/aad`. The new workspace configuration returns to `/`; its image and
-homepage changes still need Azure promotion. The earlier deployment returns to
-`/docs`, where Swagger UI provided the initial XML upload/download interaction.
-No Graph permissions to read user files or mail
-are requested. Tokens are not persisted in an EasyAuth token store; browser
+`/.auth/login/aad` and returns to the workspace at `/`, deployed on 2026-10-15.
+The Entra homepage also targets `/`; `/docs` remains available for developers.
+No Graph permissions to read user files or mail are requested.
+Tokens are not persisted in an EasyAuth token store; browser
 session cookies still authenticate requests.
 
 The registration enables ID-token issuance for the built-in hybrid OpenID Connect
@@ -83,7 +82,7 @@ Then get the browser sign-in URL:
 terraform -chdir=terraform/environments/dev output -raw api_sign_in_url
 ```
 
-Sign in with the allowlisted Azure user, confirm `/docs` loads, then submit
+Sign in with the allowlisted Azure user, confirm the workspace at `/` loads, then submit
 `tests/fixtures/ibkr_synthetic.xml` with tax year `2025`. Verify the downloaded PDF
 contains the synthetic account and year. Sign out through `/.auth/logout` and
 confirm access is denied again. If another tenant user is available for testing,
@@ -91,7 +90,7 @@ confirm their authenticated request is forbidden by the identity allowlist.
 Sign-out behavior and rejection of an authenticated user outside the allowlist
 remain additional access-control checks; they were not observed in this checkpoint.
 
-In Swagger UI, expand `POST /v1/statements`, choose **Try it out**, select the
+Alternatively, open Swagger UI at `/docs`, expand `POST /v1/statements`, choose **Try it out**, select the
 synthetic XML, enter `2025`, and choose **Execute**. A successful response is HTTP
 200 with PDF content; use **Download file** to save it. The PDF should include
 account `U0000000` and tax year `2025`. The initial browser checks should use this
