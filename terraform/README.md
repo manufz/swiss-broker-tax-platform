@@ -106,7 +106,7 @@ allowlist and ACR image. Local synthetic checks need none of these Azure resourc
 
 Do not connect a new subscription's configuration to the author's backend or
 create fresh empty state for already managed resources. The
-[bootstrap guide](bootstrap/README.md) records the original migration.
+[bootstrap guide](bootstrap/README.md) explains state storage setup and migration.
 
 ## Operations
 

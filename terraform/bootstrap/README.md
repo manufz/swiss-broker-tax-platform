@@ -11,7 +11,7 @@ It creates four resources:
 - A private `tfstate` container.
 - `Storage Blob Data Contributor` for the applying Azure identity, scoped to that
   container. Run this bootstrap using the same Azure user on subsequent applies.
-  Future CI deployment identities will receive separate role assignments.
+  CI deployment identities use separate role assignments.
 
 Anonymous blob access and Shared Key authentication are disabled. The HTTPS
 endpoint is reachable from your laptop; access requires Microsoft Entra identity
@@ -22,43 +22,47 @@ recovery options. Storage and retained versions are metered.
 The bootstrap provider uses Resource Manager APIs for storage creation and skips
 legacy queue/static-website data-plane reads. This avoids requiring blob access
 before the container and its role assignment exist. Backend blob authentication
-will be configured separately during migration.
+uses Microsoft Entra through the Azure CLI, independently of resource creation.
 
 `prevent_destroy` blocks planned deletion or replacement of the resource group,
 account and container while those resource blocks remain in configuration. It is
 a Terraform guard, not an Azure resource lock; it does not protect manual deletion
 or removal of those resource blocks.
 
-## Storage creation checkpoint (completed)
+## Create state storage
 
-Use your existing Azure CLI login and subscription:
+For a new subscription, prepare a private copy of this root without `backend.tf`,
+as described in the [deployment guide](../README.md#deploy-in-a-different-azure-subscription).
+Run the initial storage creation from that working copy using the authorized
+Azure CLI login and subscription:
 
 ```bash
 export ARM_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
-terraform -chdir=terraform/bootstrap init
-terraform -chdir=terraform/bootstrap apply
+terraform init
+terraform plan
+terraform apply
 ```
 
 Review the fresh plan before typing `yes`. The first apply should show
 `4 to add, 0 to change, 0 to destroy`. The applying identity needs permission to
-create resources and role assignments, as it did for the registry's AcrPull role.
-`Microsoft.Storage` was registered during the Kursliste deployment.
+create resources and role assignments. Register `Microsoft.Storage` before
+creating the storage resources.
 
-This command sequence was used before adding `backend.tf`. The storage has now
-been created and both states migrated. The committed configuration connects to
-the existing backend during `init`; it does not bootstrap an empty subscription.
+For an existing deployment, the committed configuration connects to its backend
+during `terraform -chdir=terraform/bootstrap init`. Review a normal plan before
+applying changes; do not create fresh local state for existing resources.
 Commit the `.tf` files and this root's `.terraform.lock.hcl`. State stays out of Git.
 
-## Migration checkpoint (completed)
+## Backend migration
 
-Identity-based access was verified. Both roots now use the `azurerm` backend with
+Both roots use the `azurerm` backend with
 `use_azuread_auth = true` and `use_cli = true`, and separate blob keys:
 `dev.terraform.tfstate` for application state and `bootstrap.terraform.tfstate`
-for this root's state. Resource records, outputs and lineages were preserved.
-State-lock contention was tested and the diagnostic lease released. See the
+for this root's state. Verify state locking and release any diagnostic lease
+afterward. See the
 [remote-state guide](../remote-state.md) for backups and verification details.
 
-The migration must preserve the existing state and resource addresses. Use
+Migration must preserve resource records, outputs, lineages and resource addresses. Use
 `terraform init -migrate-state` after adding each backend block, then check that
 both plans report no changes. Back up the local files into an ignored directory
 before migration. Do not use `-reconfigure` as a substitute for migrating local
