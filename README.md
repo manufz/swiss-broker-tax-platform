@@ -17,7 +17,7 @@ into a PDF with embedded eCH-0196 data for a Swiss tax-reporting workflow.
 The current implementation supports IBKR Flex XML only; it does not accept
 arbitrary broker PDFs, CSVs or exports from other brokers yet.
 
-## What I built
+## Platform capabilities
 
 - FastAPI upload boundary with secure XML parsing, annual-report/account/canton
   checks, bounded multipart bodies and useful static errors.
