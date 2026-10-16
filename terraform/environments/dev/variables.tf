@@ -75,7 +75,7 @@ variable "github_oidc_subject" {
 variable "api_image_digest" {
   description = "Verified registry digest of the API image to deploy."
   type        = string
-  default     = "sha256:2c7f89d73cb23ae053436cf736b2a2d48fe9f277416f057566f83c5a60f903a4"
+  default     = "sha256:1615cd9c26ebf684945e5449699e40a2d47a7ae65872e839c1102157c8fdebdc"
 
   validation {
     condition     = can(regex("^sha256:[0-9a-f]{64}$", var.api_image_digest))
