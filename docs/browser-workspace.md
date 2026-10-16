@@ -39,7 +39,9 @@ use the documented official Kursliste release for personal processing.
   Downloading explicitly saves the user's copy. No local/session storage,
   analytics, remote fonts or broker credentials are used.
 - A restrictive content-security policy permits only local assets and requests;
-  the page is served with `Cache-Control: no-store` and no-referrer policy.
+  the page is served with `Cache-Control: no-store`. The `same-origin` referrer
+  policy supports Easy Auth's cookie-authenticated upload checks while omitting
+  referrers on requests to other origins.
 - Keyboard focus, file-picker access, live status announcements, reduced motion
   and a stacked mobile layout are included.
 

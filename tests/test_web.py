@@ -17,7 +17,7 @@ def test_workspace_is_served_with_local_assets_and_private_page_headers(monkeypa
     assert response.headers["cache-control"] == "no-store"
     assert "frame-ancestors 'none'" in response.headers["content-security-policy"]
     assert "script-src 'self'" in response.headers["content-security-policy"]
-    assert response.headers["referrer-policy"] == "no-referrer"
+    assert response.headers["referrer-policy"] == "same-origin"
     assert '<option value="2025">2025</option>' in response.text
     assert '<script src="/assets/app.js" defer></script>' in response.text
     assert "Securities income is not calculated" in " ".join(response.text.split())

@@ -26,7 +26,8 @@ app.mount("/assets", StaticFiles(directory=WEB_ROOT / "assets"), name="assets")
 PAGE_HEADERS = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
-    "Referrer-Policy": "no-referrer",
+    # Easy Auth uses same-origin referrers to validate cookie-authenticated POSTs.
+    "Referrer-Policy": "same-origin",
     "Content-Security-Policy": (
         "default-src 'none'; script-src 'self'; style-src 'self'; "
         "img-src 'self'; connect-src 'self'; base-uri 'none'; "
