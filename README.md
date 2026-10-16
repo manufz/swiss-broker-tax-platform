@@ -79,9 +79,6 @@ expected fixture values, validation coverage and calculation limits.
 
 ## Status & next steps
 
-- Deployed Azure MVP with IBKR Flex XML upload and PDF generation.
-- Signed-in browser access checks remain pending.
-- Hosted CI/CD release cycle remains to be verified.
 - Planned: IBKR Flex Web Service retrieval and additional broker integrations.
 
 ## Try locally without Azure or personal data

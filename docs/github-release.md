@@ -6,6 +6,10 @@ base-image digest, uv version and Git revisions are pinned. Debian mirrors are
 not snapshotted, so builds are not guaranteed byte-identical; record each tested
 image's digest. Never expose Terraform state or saved plans to CI.
 
+[CI](https://github.com/manufz/swiss-broker-tax-platform/actions/workflows/ci.yml)
+· [Publish verified image](https://github.com/manufz/swiss-broker-tax-platform/actions/workflows/publish-image.yml)
+· [Deploy reviewed image](https://github.com/manufz/swiss-broker-tax-platform/actions/workflows/deploy-image.yml)
+
 ## Manual image publishing
 
 From the repository root, commit the application source and use a new commit tag
